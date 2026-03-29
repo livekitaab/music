@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiveKitaab Music — Musical Research Library</title>
+<meta name="description" content="LiveKitaab Music — Premium digital books on musicology, theory, history, and composition. A new way to read music.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --charcoal:      #1a1a1c;
+    --charcoal-deep: #111112;
+    --charcoal-mid:  #222226;
+    --charcoal-lift: #2c2c30;
+    --groove:        #0d0d0e;
+    --brown:         #7a4a22;
+    --brown-warm:    #a0622a;
+    --brown-light:   #c8894e;
+    --gold:          #d4a853;
+    --gold-bright:   #f0c060;
+    --gold-dim:      #2a1f08;
+    --gold-line:     #8a6a28;
+    --cream:         #f5ead8;
+    --text:          #f0e8d8;
+    --text-mid:      #a89878;
+    --text-dim:      #5a4e3a;
+    --green:         #2ecc71;
+    --green-dark:    #27ae60;
+    --green-dim:     #0d2e1a;
+    --border:        rgba(212,168,83,.15);
+    --border-bright: rgba(212,168,83,.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--charcoal-deep);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── GROOVE TEXTURE ───────────────────────────────────── */
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(212,168,83,.018) 3px, rgba(212,168,83,.018) 4px);
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .055;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  }
+
+  /* ── NAV ──────────────────────────────────────────────── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13,13,14,.92); backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 0 32px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 24px rgba(0,0,0,.5);
+  }
+  .nav-brand {
+    display: flex; align-items: center; gap: 12px; text-decoration: none;
+  }
+  .nav-record {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    background: conic-gradient(var(--charcoal-deep) 0deg 40deg, var(--charcoal-mid) 40deg 80deg, var(--charcoal-deep) 80deg 120deg, var(--charcoal-mid) 120deg 160deg, var(--charcoal-deep) 160deg 200deg, var(--charcoal-mid) 200deg 240deg, var(--charcoal-deep) 240deg 280deg, var(--charcoal-mid) 280deg 320deg, var(--charcoal-deep) 320deg 360deg);
+    border: 1.5px solid var(--gold); position: relative;
+    animation: spin 5s linear infinite paused;
+  }
+  .nav-record::after { content: ''; position: absolute; inset: 50%; transform: translate(-50%,-50%); width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+  .nav-record:hover { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .nav-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: .1em; }
+  .nav-name .live { color: var(--text); }
+  .nav-name .kit  { color: var(--gold); }
+  .nav-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: .68rem; color: var(--text-mid); letter-spacing: .18em; text-transform: uppercase; display: block; }
+
+  .nav-links { display: flex; gap: 4px; align-items: center; }
+  .nav-links a { color: var(--text-mid); font-size: .8rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; transition: all .2s; }
+  .nav-links a:hover { color: var(--gold); background: rgba(212,168,83,.08); }
+  .nav-cta {
+    background: var(--gold) !important; color: var(--charcoal-deep) !important;
+    font-weight: 600 !important; padding: 7px 20px !important; border-radius: 20px;
+  }
+  .nav-cta:hover { background: var(--gold-bright) !important; }
+
+  /* ── HERO ─────────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    background:
+      linear-gradient(160deg, rgba(13,13,14,.97) 0%, rgba(26,26,28,.88) 40%, rgba(42,31,8,.7) 75%, transparent 100%),
+      url('https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=1400&q=80') center/cover no-repeat;
+    display: flex; align-items: center;
+    padding: 120px 32px 90px;
+    position: relative; overflow: hidden;
+  }
+  /* Vinyl disc decoration */
+  .hero::before {
+    content: '';
+    position: absolute; right: -100px; top: 50%; transform: translateY(-50%);
+    width: 600px; height: 600px; border-radius: 50%;
+    background: conic-gradient(
+      var(--charcoal-deep) 0deg 15deg, #1c1c1e 15deg 30deg,
+      var(--charcoal-deep) 30deg 45deg, #1c1c1e 45deg 60deg,
+      var(--charcoal-deep) 60deg 75deg, #1c1c1e 75deg 90deg,
+      var(--charcoal-deep) 90deg 105deg, #1c1c1e 105deg 120deg,
+      var(--charcoal-deep) 120deg 135deg, #1c1c1e 135deg 150deg,
+      var(--charcoal-deep) 150deg 165deg, #1c1c1e 165deg 180deg,
+      var(--charcoal-deep) 180deg 195deg, #1c1c1e 195deg 210deg,
+      var(--charcoal-deep) 210deg 225deg, #1c1c1e 225deg 240deg,
+      var(--charcoal-deep) 240deg 255deg, #1c1c1e 255deg 270deg,
+      var(--charcoal-deep) 270deg 285deg, #1c1c1e 285deg 300deg,
+      var(--charcoal-deep) 300deg 315deg, #1c1c1e 315deg 330deg,
+      var(--charcoal-deep) 330deg 345deg, #1c1c1e 345deg 360deg
+    );
+    border: 4px solid rgba(212,168,83,.2);
+    opacity: .35;
+    animation: spin 20s linear infinite;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 140px;
+    background: linear-gradient(to top, var(--charcoal-deep), transparent);
+  }
+  .hero-inner { max-width: 680px; position: relative; z-index: 1; }
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace; font-size: .68rem;
+    text-transform: uppercase; letter-spacing: .22em; color: var(--gold);
+    margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+  }
+  .hero-eyebrow::before { content: '▶'; font-size: .6rem; }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    letter-spacing: .06em; line-height: .95;
+    color: var(--text); margin-bottom: 24px;
+  }
+  .hero-title span { color: var(--gold); display: block; }
+  .hero-sub {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: clamp(1rem, 2.4vw, 1.2rem);
+    color: var(--text-mid); line-height: 1.75; margin-bottom: 38px; max-width: 520px;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--gold); color: var(--charcoal-deep);
+    font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: .1em;
+    padding: 14px 36px; border-radius: 50px; text-decoration: none;
+    transition: all .22s; box-shadow: 0 4px 24px rgba(212,168,83,.35);
+    border: none; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--gold-bright); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(212,168,83,.5); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: transparent; color: var(--text-mid);
+    font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 500;
+    padding: 14px 32px; border-radius: 50px; text-decoration: none;
+    border: 1.5px solid var(--border-bright); transition: all .22s;
+  }
+  .btn-secondary:hover { color: var(--gold); border-color: var(--gold-line); background: var(--gold-dim); }
+
+  /* Scroll cue */
+  .hero-scroll {
+    position: absolute; bottom: 150px; left: 32px; z-index: 1;
+    font-family: 'DM Mono', monospace; font-size: .6rem;
+    text-transform: uppercase; letter-spacing: .14em; color: rgba(212,168,83,.35);
+    animation: nudge 2s ease infinite;
+  }
+  @keyframes nudge { 0%,100%{transform:translateY(0)}50%{transform:translateY(8px)} }
+
+  /* ── ABOUT ────────────────────────────────────────────── */
+  .about {
+    padding: 110px 32px;
+    background: var(--charcoal-mid);
+    border-top: 1px solid var(--border);
+    position: relative;
+  }
+  .about-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 90px; align-items: center;
+  }
+  @media (max-width: 768px) { .about-inner { grid-template-columns: 1fr; gap: 52px; } }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace; font-size: .65rem;
+    text-transform: uppercase; letter-spacing: .2em; color: var(--gold);
+    margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content: ''; width: 22px; height: 1px; background: var(--gold); display: inline-block; }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    letter-spacing: .06em; line-height: 1.05;
+    color: var(--text); margin-bottom: 20px;
+  }
+  .section-title span { color: var(--gold); }
+  .section-body {
+    font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+    color: var(--text-mid); line-height: 1.85; margin-bottom: 16px;
+  }
+
+  .features { display: flex; flex-direction: column; gap: 18px; margin-top: 30px; }
+  .feature {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px; border-radius: 10px;
+    background: var(--charcoal-lift); border: 1px solid var(--border);
+    transition: border-color .2s;
+  }
+  .feature:hover { border-color: var(--gold-line); }
+  .feature-icon {
+    width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+    background: var(--gold-dim); border: 1px solid var(--gold-line);
+    display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+  }
+  .feature-title { font-size: .84rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .feature-body  { font-size: .76rem; color: var(--text-mid); line-height: 1.55; }
+
+  /* About visual — stacked vinyl labels */
+  .about-visual { display: flex; align-items: center; justify-content: center; }
+  .vinyl-stack { position: relative; width: 280px; height: 360px; }
+  .vinyl-disc {
+    position: absolute; border-radius: 50%; box-shadow: 0 16px 48px rgba(0,0,0,.6);
+  }
+  .vinyl-disc:nth-child(1) {
+    width: 240px; height: 240px; top: 80px; left: 30px;
+    background: conic-gradient(var(--charcoal-deep) 0deg 15deg, #1c1c1e 15deg 30deg, var(--charcoal-deep) 30deg 45deg, #1c1c1e 45deg 60deg, var(--charcoal-deep) 60deg 75deg, #1c1c1e 75deg 90deg, var(--charcoal-deep) 90deg 105deg, #1c1c1e 105deg 120deg, var(--charcoal-deep) 120deg 135deg, #1c1c1e 135deg 150deg, var(--charcoal-deep) 150deg 165deg, #1c1c1e 165deg 180deg, var(--charcoal-deep) 180deg 195deg, #1c1c1e 195deg 210deg, var(--charcoal-deep) 210deg 225deg, #1c1c1e 225deg 240deg, var(--charcoal-deep) 240deg 255deg, #1c1c1e 255deg 270deg, var(--charcoal-deep) 270deg 285deg, #1c1c1e 285deg 300deg, var(--charcoal-deep) 300deg 315deg, #1c1c1e 315deg 330deg, var(--charcoal-deep) 330deg 345deg, #1c1c1e 345deg 360deg);
+    border: 3px solid rgba(212,168,83,.25); transform: rotate(-10deg);
+  }
+  .vinyl-disc:nth-child(2) {
+    width: 200px; height: 200px; top: 20px; left: 0;
+    background: conic-gradient(#1a1a1c 0deg 20deg, #222226 20deg 40deg, #1a1a1c 40deg 60deg, #222226 60deg 80deg, #1a1a1c 80deg 100deg, #222226 100deg 120deg, #1a1a1c 120deg 140deg, #222226 140deg 160deg, #1a1a1c 160deg 180deg, #222226 180deg 200deg, #1a1a1c 200deg 220deg, #222226 220deg 240deg, #1a1a1c 240deg 260deg, #222226 260deg 280deg, #1a1a1c 280deg 300deg, #222226 300deg 320deg, #1a1a1c 320deg 340deg, #222226 340deg 360deg);
+    border: 3px solid rgba(212,168,83,.35); transform: rotate(5deg);
+    animation: spin 12s linear infinite;
+  }
+  /* Label on top disc */
+  .vinyl-disc:nth-child(2)::after {
+    content: ''; position: absolute; inset: 50%; transform: translate(-50%,-50%);
+    width: 60px; height: 60px; border-radius: 50%;
+    background: radial-gradient(circle, var(--gold-bright) 0%, var(--gold) 50%, var(--brown) 100%);
+    box-shadow: 0 0 16px rgba(212,168,83,.4);
+  }
+  .vinyl-label {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: center; pointer-events: none;
+  }
+  .vinyl-label-inner {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: var(--gold); display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: .6rem; letter-spacing: .08em;
+    color: var(--charcoal-deep); text-align: center; line-height: 1.2;
+    box-shadow: 0 0 20px rgba(212,168,83,.5);
+  }
+
+  .vinyl-card {
+    position: absolute; bottom: 0; right: 0;
+    background: var(--charcoal-lift); border: 1px solid var(--border-bright);
+    border-radius: 10px; padding: 14px 16px; width: 180px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.5);
+  }
+  .vinyl-card::before { content: ''; display: block; height: 2px; margin: -14px -16px 12px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .vinyl-card-title { font-family: 'Cormorant Garamond', serif; font-size: .82rem; font-weight: 600; color: var(--text); line-height: 1.35; margin-bottom: 4px; }
+  .vinyl-card-meta  { font-family: 'DM Mono', monospace; font-size: .6rem; color: var(--text-dim); }
+
+  /* ── SHOWCASE ─────────────────────────────────────────── */
+  .showcase {
+    padding: 100px 32px;
+    background: var(--groove);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .showcase::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(212,168,83,.025) 0px, rgba(212,168,83,.025) 1px, transparent 1px, transparent 60px);
+  }
+  .showcase-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+  .showcase-header { text-align: center; margin-bottom: 60px; }
+  .showcase-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: .92rem; color: var(--text-dim); margin-top: 14px; }
+
+  .gif-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  @media (max-width:768px) { .gif-grid { grid-template-columns: 1fr; } }
+  .gif-card {
+    border-radius: 12px; overflow: hidden; position: relative;
+    aspect-ratio: 4/3; background: var(--charcoal-mid);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s;
+  }
+  .gif-card:hover { transform: translateY(-6px); box-shadow: 0 18px 48px rgba(0,0,0,.65); border-color: var(--gold-line); }
+  .gif-card:first-child { grid-column: span 3; aspect-ratio: 16/9; }
+  @media (max-width:768px) { .gif-card:first-child { grid-column: span 1; aspect-ratio: 4/3; } }
+  .gif-card img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .4s ease; }
+  .gif-card:hover img { transform: scale(1.04); }
+  .gif-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(13,13,14,.88) 0%, transparent 55%);
+    display: flex; align-items: flex-end; padding: 20px;
+  }
+  .gif-caption { font-family: 'Cormorant Garamond', serif; font-size: .9rem; font-weight: 600; color: var(--text); line-height: 1.35; }
+  .gif-caption span { display: block; font-family: 'DM Mono', monospace; font-size: .62rem; color: var(--text-dim); font-weight: 400; margin-top: 3px; letter-spacing: .04em; }
+
+  /* ── FEATURED BOOKS ───────────────────────────────────── */
+  .books {
+    padding: 100px 32px;
+    background: var(--charcoal-mid);
+    border-top: 1px solid var(--border);
+  }
+  .books-inner { max-width: 1100px; margin: 0 auto; }
+  .books-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 16px; }
+  .view-all {
+    font-family: 'DM Mono', monospace; font-size: .72rem; color: var(--gold);
+    text-decoration: none; letter-spacing: .06em;
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 1px solid var(--gold-line); padding-bottom: 2px;
+    transition: gap .18s, color .18s;
+  }
+  .view-all:hover { gap: 12px; color: var(--gold-bright); }
+
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 22px; }
+  .book-card {
+    background: var(--charcoal-lift); border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    overflow: hidden; transition: transform .22s, box-shadow .22s, border-color .22s;
+    text-decoration: none; display: flex; flex-direction: column; cursor: pointer;
+  }
+  .book-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 16px 40px rgba(0,0,0,.6); border-color: var(--gold-line); }
+  .book-cover-wrap { position: relative; aspect-ratio: 2/3; overflow: hidden; background: var(--charcoal-deep); }
+  .book-cover-wrap img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .4s; }
+  .book-card:hover .book-cover-wrap img { transform: scale(1.06); }
+  .book-cover-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2.8rem; color: var(--gold-line); }
+  .book-badge { position:absolute; top:8px; right:8px; padding:3px 9px; border-radius:10px; font-size:.6rem; font-weight:700; font-family:'DM Mono',monospace; letter-spacing:.06em; backdrop-filter:blur(4px); }
+  .badge-free { background:rgba(46,204,113,.25); color:var(--green); border:1px solid rgba(46,204,113,.3); }
+  .badge-paid { background:rgba(212,168,83,.2); color:var(--gold); border:1px solid rgba(212,168,83,.3); }
+  /* Gold line at bottom of cover */
+  .book-cover-wrap::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:.5; }
+
+  .book-info { padding: 13px 12px 8px; flex: 1; }
+  .book-title-text { font-family:'Cormorant Garamond',serif; font-size:.88rem; font-weight:600; color:var(--text); line-height:1.35; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .book-author-text { font-family:'DM Mono',monospace; font-size:.62rem; color:var(--text-dim); letter-spacing:.03em; }
+  .book-cta { margin:0 12px 12px; padding:8px; border-radius:7px; background:var(--gold-dim); color:var(--gold); border:1px solid var(--gold-line); text-align:center; font-size:.74rem; font-weight:600; cursor:pointer; transition:all .18s; font-family:'DM Sans',sans-serif; }
+  .book-cta:hover { background:var(--gold); color:var(--charcoal-deep); }
+  .book-cta.free { background:var(--green-dim); color:var(--green); border-color:rgba(46,204,113,.3); }
+  .book-cta.free:hover { background:var(--green); color:var(--charcoal-deep); }
+
+  /* ── CONTACT ──────────────────────────────────────────── */
+  .contact {
+    padding: 100px 32px;
+    background: var(--groove);
+    border-top: 1px solid var(--border-bright);
+    position: relative; overflow: hidden;
+  }
+  .contact::before {
+    content: '🎵'; position: absolute; right: -30px; bottom: -30px;
+    font-size: 200px; opacity: .04; pointer-events: none; transform: rotate(-10deg);
+  }
+  .contact-inner { max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
+  .contact-sub { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.95rem; color:var(--text-dim); margin-bottom: 50px; line-height: 1.75; margin-top: 14px; }
+
+  .contact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); gap: 14px; margin-bottom: 40px; }
+  .contact-card {
+    background: var(--charcoal-mid); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px; text-align: left;
+    transition: border-color .2s, background .2s; position: relative; overflow: hidden;
+  }
+  .contact-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--border-bright),transparent); }
+  .contact-card:hover { border-color: var(--gold-line); background: var(--charcoal-lift); }
+  .contact-card-icon { font-size: 1.3rem; margin-bottom: 10px; }
+  .contact-card-label { font-family:'DM Mono',monospace; font-size:.6rem; text-transform:uppercase; letter-spacing:.12em; color:var(--text-dim); margin-bottom:6px; }
+  .contact-card-value { font-size:.82rem; color:var(--text); font-weight:500; word-break:break-all; }
+  .contact-card-value a { color:var(--gold); text-decoration:none; }
+  .contact-card-value a:hover { text-decoration:underline; color:var(--gold-bright); }
+
+  .social-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .social-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--charcoal-mid); border:1px solid var(--border);
+    color:var(--text-mid); padding:10px 20px; border-radius:30px;
+    font-size:.78rem; font-weight:500; text-decoration:none;
+    transition:all .2s; font-family:'DM Sans',sans-serif;
+  }
+  .social-btn:hover { background:var(--gold-dim); border-color:var(--gold-line); color:var(--gold); transform:translateY(-2px); }
+
+  /* ── FOOTER ───────────────────────────────────────────── */
+  .footer {
+    background: var(--charcoal-deep); padding: 24px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-brand { font-family:'Bebas Neue',sans-serif; font-size:.95rem; letter-spacing:.1em; }
+  .footer-brand .live { color:rgba(240,232,216,.4); }
+  .footer-brand .kit  { color:var(--gold); }
+  .footer-copy { font-family:'DM Mono',monospace; font-size:.62rem; color:var(--text-dim); }
+  .footer-links { display:flex; gap:16px; }
+  .footer-links a { font-family:'DM Mono',monospace; font-size:.62rem; color:var(--text-dim); text-decoration:none; transition:color .18s; }
+  .footer-links a:hover { color:var(--gold); }
+
+  /* ── ANIMATIONS ───────────────────────────────────────── */
+  .reveal { opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+  .reveal-delay-1 { transition-delay:.1s; }
+  .reveal-delay-2 { transition-delay:.2s; }
+  .reveal-delay-3 { transition-delay:.3s; }
+  .reveal-delay-4 { transition-delay:.4s; }
+
+  /* ── RESPONSIVE ───────────────────────────────────────── */
+  @media (max-width:600px) {
+    .nav { padding:0 16px; }
+    .nav-links a:not(.nav-cta) { display:none; }
+    .hero, .about, .showcase, .books, .contact { padding:80px 18px; }
+    .footer { padding:18px; flex-direction:column; text-align:center; }
+    .hero-scroll { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-brand" href="Index.html">
+    <div class="nav-record"></div>
+    <div>
+      <div class="nav-name"><span class="live">LIVE</span><span class="kit">KITAAB</span></div>
+      <span class="nav-sub">Music</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#books">Books</a>
+    <a href="#contact">Contact</a>
+    <a href="MusicMain.html" class="nav-cta">▶ Start Reading</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Musical Research Library</div>
+    <h1 class="hero-title">
+      Read the<br>
+      <span>Sound</span>
+    </h1>
+    <p class="hero-sub">
+      LiveKitaab Music brings you the finest books on musicology, theory, history, and
+      composition — beautifully presented for the serious student and the curious listener alike.
+    </p>
+    <div class="hero-actions">
+      <a href="MusicMain.html" class="btn-primary">▶ Browse the Library</a>
+      <a href="#about" class="btn-secondary">Learn More ↓</a>
+    </div>
+  </div>
+  <div class="hero-scroll">↓ &nbsp; Scroll to explore</div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-text">
+      <div class="eyebrow reveal">Who We Are</div>
+      <h2 class="section-title reveal reveal-delay-1">A Library Built<br>for <span>Music Minds</span></h2>
+      <p class="section-body reveal reveal-delay-2">
+        LiveKitaab Music is a curated digital library dedicated to musical scholarship —
+        from classical theory to modern ethnomusicology. Every title is chosen to deepen
+        your understanding of the art of sound.
+      </p>
+      <p class="section-body reveal reveal-delay-2">
+        Whether you are a conservatory student, a working musician, or simply someone
+        who loves music deeply, our collection has something to illuminate your journey.
+      </p>
+      <div class="features">
+        <div class="feature reveal reveal-delay-3">
+          <div class="feature-icon">📱</div>
+          <div>
+            <div class="feature-title">Read on Any Device</div>
+            <div class="feature-body">No app download needed. Works on any phone, tablet, or computer.</div>
+          </div>
+        </div>
+        <div class="feature reveal reveal-delay-4">
+          <div class="feature-icon">🎵</div>
+          <div>
+            <div class="feature-title">Music-First Presentation</div>
+            <div class="feature-body">Books come alive with notation examples, embedded audio, and rich typography.</div>
+          </div>
+        </div>
+        <div class="feature reveal reveal-delay-4">
+          <div class="feature-icon">✍️</div>
+          <div>
+            <div class="feature-title">Supporting Scholars</div>
+            <div class="feature-body">Every subscription directly supports the researchers and authors who write here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-visual reveal reveal-delay-2">
+      <div class="vinyl-stack">
+        <div class="vinyl-disc"></div>
+        <div class="vinyl-disc">
+          <div class="vinyl-label">
+            <div class="vinyl-label-inner">LK<br>MUSIC</div>
+          </div>
+        </div>
+        <div class="vinyl-card">
+          <div class="vinyl-card-title">Introduction to Musicology</div>
+          <div class="vinyl-card-meta">Team LiveKitaab Music</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section class="showcase" id="showcase">
+  <div class="showcase-inner">
+    <div class="showcase-header">
+      <div class="eyebrow reveal" style="justify-content:center;">Inside LiveKitaab Music</div>
+      <h2 class="section-title reveal reveal-delay-1" style="text-align:center;">Reading, <span>Reimagined</span></h2>
+      <p class="showcase-sub reveal reveal-delay-2">See how musical knowledge comes alive with our reading experience.</p>
+    </div>
+    <div class="gif-grid">
+      <!-- REPLACE src with your actual GIF URLs -->
+      <div class="gif-card reveal">
+        <img src="YOUR_MAIN_GIF_URL_HERE" alt="LiveKitaab Music reading experience"
+             onerror="this.src='https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=1200&q=80'">
+        <div class="gif-overlay">
+          <div class="gif-caption">
+            The Reading Experience
+            <span>Beautiful typography meets musicological depth</span>
+          </div>
+        </div>
+      </div>
+      <div class="gif-card reveal reveal-delay-1">
+        <img src="YOUR_GIF_2_URL_HERE" alt="Book preview"
+             onerror="this.src='https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80'">
+        <div class="gif-overlay">
+          <div class="gif-caption">Rich Content<span>Theory, notation, and history</span></div>
+        </div>
+      </div>
+      <div class="gif-card reveal reveal-delay-2">
+        <img src="YOUR_GIF_3_URL_HERE" alt="Library showcase"
+             onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80'">
+        <div class="gif-overlay">
+          <div class="gif-caption">Growing Library<span>New titles added regularly</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED BOOKS -->
+<section class="books" id="books">
+  <div class="books-inner">
+    <div class="books-header">
+      <div>
+        <div class="eyebrow reveal">Our Collection</div>
+        <h2 class="section-title reveal reveal-delay-1">Featured <span>Titles</span></h2>
+      </div>
+      <a href="MusicMain.html" class="view-all reveal">View full library →</a>
+    </div>
+    <div class="books-grid" id="featuredGrid"></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <div class="eyebrow reveal" style="justify-content:center;">Get in Touch</div>
+    <h2 class="section-title reveal reveal-delay-1" style="text-align:center;">We'd love to<br><span>Hear from You</span></h2>
+    <p class="contact-sub reveal reveal-delay-2">
+      Questions about a title? Want to publish your research with us?
+      Reach out — we read every message.
+    </p>
+    <div class="contact-cards reveal reveal-delay-2">
+      <div class="contact-card">
+        <div class="contact-card-icon">📧</div>
+        <div class="contact-card-label">General Enquiries</div>
+        <div class="contact-card-value"><a href="mailto:acjee2059@gmail.com">acjee2059@gmail.com</a></div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-card-icon">✍️</div>
+        <div class="contact-card-label">Authors & Publishing</div>
+        <div class="contact-card-value"><a href="mailto:authors@livekitaab.com">authors@livekitaab.com</a></div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-card-icon">🛠</div>
+        <div class="contact-card-label">Support</div>
+        <div class="contact-card-value"><a href="mailto:support@livekitaab.com">support@livekitaab.com</a></div>
+      </div>
+    </div>
+    <div class="social-row reveal reveal-delay-3">
+      <a href="#" class="social-btn">📘 Facebook</a>
+      <a href="#" class="social-btn">📸 Instagram</a>
+      <a href="#" class="social-btn">🐦 Twitter / X</a>
+      <a href="#" class="social-btn">▶ YouTube</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand"><span class="live">LIVE</span><span class="kit">KITAAB</span> &nbsp;<span style="color:var(--text-dim);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;">Music</span></div>
+  <div class="footer-copy">© 2026 LiveKitaab Music. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="MusicMain.html">Library</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+const LIBRARY_URL = 'https://raw.githubusercontent.com/livekitaab/music/main/library.json';
+
+const FALLBACK = [
+  { id:'music_demo', title:'Introduction to Musicology', author:'Team LiveKitaab Music', price:0, type:'long_book', cover:'' },
+  { id:'music_2',    title:'The History of Western Music', author:'Team LiveKitaab Music', price:10, type:'long_book', cover:'' },
+];
+
+async function loadFeatured() {
+  let books = FALLBACK;
+  try {
+    const r = await fetch(LIBRARY_URL);
+    const j = await r.json();
+    if (j.books && j.books.length) books = j.books;
+  } catch { /* use fallback */ }
+  const grid = document.getElementById('featuredGrid');
+  grid.innerHTML = '';
+  books.slice(0,4).forEach((book,i) => grid.appendChild(makeBookCard(book,i)));
+  attachObservers();
+}
+
+function makeBookCard(book, i) {
+  const isFree = book.price === 0;
+  const a = document.createElement('a');
+  a.href = 'MusicMain.html';
+  a.className = 'book-card reveal' + (i > 0 ? ` reveal-delay-${Math.min(i,4)}` : '');
+
+  const cw = document.createElement('div');
+  cw.className = 'book-cover-wrap';
+  if (book.cover) {
+    const img = document.createElement('img');
+    img.src = book.cover; img.alt = book.title; img.loading = 'lazy';
+    img.onerror = () => { cw.innerHTML = '<div class="book-cover-placeholder">🎵</div>'; };
+    cw.appendChild(img);
+  } else {
+    const ph = document.createElement('div');
+    ph.className = 'book-cover-placeholder'; ph.textContent = '🎵';
+    cw.appendChild(ph);
+  }
+  const badge = document.createElement('span');
+  badge.className = 'book-badge ' + (isFree ? 'badge-free' : 'badge-paid');
+  badge.textContent = isFree ? 'Free' : '₹' + book.price;
+  cw.appendChild(badge);
+
+  a.appendChild(cw);
+  a.innerHTML += `
+    <div class="book-info">
+      <div class="book-title-text">${esc(book.title)}</div>
+      <div class="book-author-text">${esc(book.author||'')}</div>
+    </div>
+    <div class="book-cta ${isFree?'free':''}">${isFree ? '▶ Read Free' : '⭐ Subscribe to Read'}</div>`;
+  return a;
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+
+function attachObservers() {
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+window.addEventListener('DOMContentLoaded', loadFeatured);
+</script>
+</body>
+</html>

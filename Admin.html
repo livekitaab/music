@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiveKitaab Music — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0d0e;
+    --surface:   #161618;
+    --surface2:  #1c1c1f;
+    --border:    rgba(212,168,83,.15);
+    --border-hi: rgba(212,168,83,.35);
+    --gold:      #d4a853;
+    --gold-dim:  #2a1f08;
+    --gold-line: #8a6a28;
+    --green:     #2ecc71;
+    --green-dim: #0d2e1a;
+    --red:       #e74c3c;
+    --red-dim:   #2e0d0d;
+    --text:      #f0e8d8;
+    --text-mid:  #a89878;
+    --text-dim:  #5a4e3a;
+    --radius:    10px;
+  }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh;
+  }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(212,168,83,.015) 3px,rgba(212,168,83,.015) 4px);
+  }
+
+  /* ── LOGIN ──────────────────────────────────────────── */
+  #loginScreen {
+    position:fixed; inset:0; background:var(--bg); z-index:999;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .login-box {
+    background:var(--surface); border:1px solid var(--border-hi);
+    border-radius:16px; padding:44px 36px; width:100%; max-width:360px;
+    box-shadow:0 24px 64px rgba(0,0,0,.7); position:relative; overflow:hidden;
+  }
+  .login-box::before {
+    content:''; display:block; height:2px; margin:-44px -36px 32px;
+    background:linear-gradient(90deg,transparent,var(--gold),var(--gold-dim));
+  }
+  .login-record {
+    width:56px; height:56px; border-radius:50%; margin:0 auto 20px;
+    background:conic-gradient(var(--bg) 0deg 20deg,#1c1c1e 20deg 40deg,var(--bg) 40deg 60deg,#1c1c1e 60deg 80deg,var(--bg) 80deg 100deg,#1c1c1e 100deg 120deg,var(--bg) 120deg 140deg,#1c1c1e 140deg 160deg,var(--bg) 160deg 180deg,#1c1c1e 180deg 200deg,var(--bg) 200deg 220deg,#1c1c1e 220deg 240deg,var(--bg) 240deg 260deg,#1c1c1e 260deg 280deg,var(--bg) 280deg 300deg,#1c1c1e 300deg 320deg,var(--bg) 320deg 340deg,#1c1c1e 340deg 360deg);
+    border:2px solid var(--gold); position:relative;
+    box-shadow:0 0 20px rgba(212,168,83,.2);
+    animation:spin 4s linear infinite paused;
+  }
+  .login-record:hover { animation-play-state:running; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .login-record::after { content:''; position:absolute; inset:50%; transform:translate(-50%,-50%); width:12px; height:12px; border-radius:50%; background:var(--gold); box-shadow:0 0 8px var(--gold); }
+  .login-brand { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:.12em; color:var(--gold); text-align:center; margin-bottom:4px; }
+  .login-sub { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.78rem; color:var(--text-dim); text-align:center; margin-bottom:28px; letter-spacing:.1em; }
+  .login-field {
+    width:100%; padding:11px 14px; border-radius:var(--radius);
+    background:var(--bg); border:1.5px solid var(--border);
+    color:var(--text); font-family:'DM Mono',monospace; font-size:.85rem;
+    outline:none; transition:border-color .2s; margin-bottom:12px;
+  }
+  .login-field:focus { border-color:var(--gold-line); }
+  .login-btn {
+    width:100%; padding:11px; border-radius:var(--radius);
+    background:var(--gold); color:var(--bg);
+    font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:.12em;
+    border:none; cursor:pointer; transition:all .18s;
+  }
+  .login-btn:hover { background:#f0c060; }
+  .login-err { font-size:.72rem; color:var(--red); text-align:center; margin-top:10px; min-height:16px; font-family:'DM Mono',monospace; }
+
+  /* ── APP ────────────────────────────────────────────── */
+  #adminApp { display:none; position:relative; z-index:1; }
+
+  .topbar {
+    background:var(--surface); border-bottom:1px solid var(--border-hi);
+    padding:0 24px; height:56px; display:flex; align-items:center;
+    justify-content:space-between; position:sticky; top:0; z-index:50;
+    box-shadow:0 2px 20px rgba(0,0,0,.5);
+  }
+  .topbar-brand { display:flex; align-items:center; gap:10px; }
+  .topbar-record {
+    width:24px; height:24px; border-radius:50%; flex-shrink:0;
+    background:conic-gradient(var(--bg) 0deg 40deg,#1c1c1e 40deg 80deg,var(--bg) 80deg 120deg,#1c1c1e 120deg 160deg,var(--bg) 160deg 200deg,#1c1c1e 200deg 240deg,var(--bg) 240deg 280deg,#1c1c1e 280deg 320deg,var(--bg) 320deg 360deg);
+    border:1.5px solid var(--gold); position:relative;
+    animation:spin 3s linear infinite;
+  }
+  .topbar-record::after { content:''; position:absolute; inset:50%; transform:translate(-50%,-50%); width:6px; height:6px; border-radius:50%; background:var(--gold); }
+  .topbar-name { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:.12em; color:var(--gold); }
+  .topbar-right { display:flex; align-items:center; gap:10px; }
+  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+  .live-label { font-size:.68rem; color:var(--text-mid); font-family:'DM Mono',monospace; }
+  .top-btn {
+    background:var(--surface2); border:1px solid var(--border); color:var(--text-mid);
+    padding:6px 14px; border-radius:20px; font-size:.7rem; cursor:pointer;
+    font-family:'DM Sans',sans-serif; transition:all .18s;
+  }
+  .top-btn:hover { border-color:var(--text-mid); color:var(--text); }
+  .top-btn.danger:hover { border-color:var(--red); color:var(--red); }
+
+  /* ── STATS BAR ──────────────────────────────────────── */
+  .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--border); }
+  @media (max-width:600px) { .stats-bar { grid-template-columns:repeat(2,1fr); } }
+  .stat-cell { background:var(--surface); padding:18px 22px; border-right:1px solid var(--border); position:relative; overflow:hidden; }
+  .stat-cell:last-child { border-right:none; }
+  .stat-cell::after { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--border-hi),transparent); }
+  .stat-label { font-family:'DM Mono',monospace; font-size:.6rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px; }
+  .stat-value { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:.04em; }
+  .stat-value.gold  { color:var(--gold); }
+  .stat-value.green { color:var(--green); }
+
+  /* ── CONTENT ────────────────────────────────────────── */
+  .content { padding:28px 24px; max-width:960px; margin:0 auto; }
+  .section-header { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:.12em; color:var(--text-mid); }
+  .badge { font-family:'DM Mono',monospace; font-size:.62rem; font-weight:700; padding:2px 8px; border-radius:10px; background:var(--gold-dim); color:var(--gold); border:1px solid var(--gold-line); }
+  .badge.green { background:var(--green-dim); color:var(--green); border-color:rgba(46,204,113,.2); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .empty-state { text-align:center; padding:48px 20px; color:var(--text-dim); font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.92rem; }
+  .empty-state span { display:block; font-size:2rem; margin-bottom:10px; opacity:.35; }
+
+  /* ── UTR CARDS ──────────────────────────────────────── */
+  .utr-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:18px 20px; margin-bottom:10px;
+    display:flex; align-items:center; gap:16px;
+    animation:fadeUp .22s ease; transition:border-color .2s;
+    position:relative; overflow:hidden;
+  }
+  .utr-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--border-hi),transparent); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  .utr-card:hover { border-color:rgba(212,168,83,.3); }
+  .utr-card.approved { border-color:rgba(46,204,113,.2); background:rgba(46,204,113,.03); }
+  .utr-card.rejected { opacity:.45; }
+  @media (max-width:520px) { .utr-card { flex-direction:column; align-items:stretch; } }
+
+  .utr-body { flex:1; display:flex; flex-direction:column; gap:5px; }
+  .utr-type { font-family:'DM Mono',monospace; font-size:.6rem; text-transform:uppercase; letter-spacing:.12em; color:var(--text-dim); }
+  .utr-type.sub { color:var(--gold); }
+  .utr-title { font-family:'Cormorant Garamond',serif; font-size:.95rem; font-weight:600; color:var(--text); }
+  .utr-code { font-family:'DM Mono',monospace; font-size:.78rem; color:var(--gold); background:var(--gold-dim); border:1px solid var(--gold-line); padding:2px 8px; border-radius:5px; width:fit-content; }
+  .utr-meta { font-family:'DM Mono',monospace; font-size:.68rem; color:var(--text-dim); }
+  .utr-price { font-family:'DM Mono',monospace; font-size:.78rem; color:var(--green); font-weight:500; }
+
+  .utr-actions { display:flex; gap:8px; flex-shrink:0; }
+  .act-btn { padding:8px 18px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:.76rem; font-weight:600; border:none; cursor:pointer; transition:all .18s; white-space:nowrap; }
+  .act-approve { background:var(--green-dim); color:var(--green); border:1px solid rgba(46,204,113,.2); }
+  .act-approve:hover { background:var(--green); color:var(--bg); }
+  .act-reject  { background:var(--red-dim);   color:var(--red);   border:1px solid rgba(231,76,60,.2); }
+  .act-reject:hover  { background:var(--red);   color:var(--bg); }
+  .act-done { padding:8px 16px; border-radius:8px; font-size:.72rem; font-weight:600; color:var(--text-dim); background:transparent; border:1px solid var(--border); cursor:default; font-family:'DM Sans',sans-serif; }
+
+  /* ── SUB CARDS ──────────────────────────────────────── */
+  .sub-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px 18px; margin-bottom:8px;
+    display:flex; align-items:center; gap:14px;
+    position:relative; overflow:hidden;
+  }
+  .sub-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--border-hi),transparent); }
+  .sub-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .sub-info-text { flex:1; }
+  .sub-status { font-size:.82rem; font-weight:600; color:var(--text); }
+  .sub-meta { font-family:'DM Mono',monospace; font-size:.68rem; color:var(--text-dim); margin-top:3px; }
+  .sub-amount { font-family:'DM Mono',monospace; font-size:.82rem; color:var(--gold); font-weight:600; flex-shrink:0; }
+
+  /* ── READ CARDS ─────────────────────────────────────── */
+  .read-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px 18px; margin-bottom:8px;
+    display:flex; align-items:center; gap:14px;
+    position:relative; overflow:hidden;
+  }
+  .read-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--border-hi),transparent); }
+  .read-medal { font-size:1.2rem; flex-shrink:0; width:28px; text-align:center; }
+  .read-info { flex:1; }
+  .read-title { font-family:'Cormorant Garamond',serif; font-size:.9rem; font-weight:600; color:var(--text); }
+  .read-breakdown { font-family:'DM Mono',monospace; font-size:.66rem; color:var(--text-dim); margin-top:3px; }
+  .read-bar { height:3px; background:var(--border); border-radius:2px; margin-top:7px; overflow:hidden; }
+  .read-bar-fill { height:100%; background:linear-gradient(90deg,var(--gold-line),var(--gold)); border-radius:2px; transition:width .5s; }
+  .read-count { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--gold); flex-shrink:0; letter-spacing:.04em; }
+
+  /* ── TOAST ──────────────────────────────────────────── */
+  #toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:var(--surface2); color:var(--text); border:1px solid var(--border-hi);
+    padding:10px 24px; border-radius:30px; font-family:'DM Mono',monospace; font-size:.76rem;
+    box-shadow:0 8px 32px rgba(0,0,0,.5); transition:transform .28s ease; z-index:999;
+    white-space:nowrap; letter-spacing:.04em;
+  }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+  #toast.ok  { border-color:rgba(46,204,113,.4); color:var(--green); }
+  #toast.err { border-color:rgba(231,76,60,.4);  color:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-record"></div>
+    <div class="login-brand">LiveKitaab Music</div>
+    <div class="login-sub">Admin Panel · Restricted Access</div>
+    <input class="login-field" id="loginInput" type="password"
+           placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Enter →</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-record"></div>
+      <div class="topbar-name">LiveKitaab Music Admin</div>
+    </div>
+    <div class="topbar-right">
+      <div class="live-dot"></div>
+      <span class="live-label">Live</span>
+      <button class="top-btn" onclick="loadAll()">↻ Refresh</button>
+      <button class="top-btn danger" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-cell">
+      <div class="stat-label">Pending</div>
+      <div class="stat-value gold" id="statPending">–</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Active Subscribers</div>
+      <div class="stat-value green" id="statSubs">–</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Sub Revenue</div>
+      <div class="stat-value" id="statSubRev">–</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Total Reads</div>
+      <div class="stat-value" id="statReads">–</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="section-header">
+      <div class="section-title">Pending Approvals</div>
+      <span class="badge" id="pendingBadge">0</span>
+    </div>
+    <div id="pendingList"></div>
+
+    <div class="divider"></div>
+
+    <div class="section-header">
+      <div class="section-title">Subscriptions</div>
+      <span class="badge green" id="subsBadge">0</span>
+    </div>
+    <div id="subsList"></div>
+
+    <div class="divider"></div>
+
+    <div class="section-header">
+      <div class="section-title">Books Read</div>
+      <span class="badge green" id="readsBadge">0</span>
+    </div>
+    <div id="readList"></div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API       = 'https://library-y7vs.onrender.com';
+const ADMIN_KEY = 'LiveKitaabAdminHaiAC@2014';
+
+// ── LOGIN ──────────────────────────────────────────────
+function doLogin() {
+  const val = document.getElementById('loginInput').value.trim();
+  if (val === ADMIN_KEY) {
+    sessionStorage.setItem('lk_music_admin', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    boot();
+  } else {
+    document.getElementById('loginErr').textContent = 'Incorrect password.';
+    document.getElementById('loginInput').select();
+  }
+}
+function doLogout() { sessionStorage.removeItem('lk_music_admin'); location.reload(); }
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('lk_music_admin')) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    boot();
+  }
+});
+function boot() { loadAll(); setInterval(loadAll, 30000); }
+
+// ── LOAD ALL ───────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadPending(), loadSubs(), loadReads()]);
+}
+
+// ── PENDING ────────────────────────────────────────────
+async function loadPending() {
+  const el = document.getElementById('pendingList');
+  try {
+    const r = await fetch(`${API}/api/admin/pending`, { headers:{'X-Admin-Key':ADMIN_KEY} });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const list = (d.purchases||[]).filter(p => p.status==='pending');
+    document.getElementById('statPending').textContent  = list.length;
+    document.getElementById('pendingBadge').textContent = list.length;
+    if (!list.length) { el.innerHTML='<div class="empty-state"><span>✅</span>No pending approvals</div>'; return; }
+    el.innerHTML = '';
+    list.slice().reverse().forEach(p => el.appendChild(makePendingCard(p)));
+  } catch(e) {
+    el.innerHTML = `<div class="empty-state">Could not reach server — ${esc(e.message)}</div>`;
+  }
+}
+
+function makePendingCard(p) {
+  const card = document.createElement('div');
+  card.className = 'utr-card';
+  card.id = 'card-' + p.verification_code;
+  const isSub = p.type==='subscription' || p.book_id==='__subscription__';
+  const ts    = p.timestamp ? new Date(p.timestamp).toLocaleString('en-IN') : '–';
+  const code  = p.verification_code || '–';
+  card.innerHTML = `
+    <div class="utr-body">
+      <div class="utr-type ${isSub?'sub':''}">${isSub?'SUBSCRIPTION':'BOOK PURCHASE'}</div>
+      <div class="utr-title">${isSub ? '⭐ Subscription ₹200/month' : '🎵 ' + esc(p.book_id||'–')}</div>
+      <div class="utr-code">${esc(p.transaction_id||'–')}</div>
+      <div class="utr-meta">${ts} · Code: ${esc(code)}</div>
+      <div class="utr-price">₹${p.price??'–'}</div>
+    </div>
+    <div class="utr-actions" id="actions-${esc(code)}">
+      <button class="act-btn act-approve" onclick="approve('${esc(code)}')">✓ Approve</button>
+      <button class="act-btn act-reject"  onclick="reject('${esc(code)}')">✕ Reject</button>
+    </div>`;
+  return card;
+}
+
+async function approve(code) {
+  setActions(code, '<span class="act-done">Processing…</span>');
+  try {
+    const r = await fetch(`${API}/api/verify-purchase`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ verification_code:code, admin_key:ADMIN_KEY })
+    });
+    const d = await r.json();
+    if (d.success) {
+      toast('✓ Approved!', 'ok');
+      const card = document.getElementById('card-'+code);
+      if (card) { card.classList.add('approved'); setActions(code,'<span class="act-done">✓ Approved</span>'); }
+      setTimeout(loadAll, 1200);
+    } else { toast('Error: '+(d.error||'Unknown'), 'err'); resetActions(code); }
+  } catch { toast('Network error', 'err'); resetActions(code); }
+}
+async function reject(code) {
+  if (!confirm('Reject this submission?')) return;
+  try {
+    const r = await fetch(`${API}/api/reject-purchase`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ verification_code:code, admin_key:ADMIN_KEY })
+    });
+    const d = await r.json();
+    if (d.success) {
+      toast('Rejected', 'err');
+      const card = document.getElementById('card-'+code);
+      if (card) card.classList.add('rejected');
+      setTimeout(loadAll, 1200);
+    }
+  } catch { toast('Network error', 'err'); }
+}
+function setActions(code, html) { const e=document.getElementById('actions-'+code); if(e) e.innerHTML=html; }
+function resetActions(code) {
+  setActions(code, `<button class="act-btn act-approve" onclick="approve('${esc(code)}')">✓ Approve</button>
+                    <button class="act-btn act-reject"  onclick="reject('${esc(code)}')">✕ Reject</button>`);
+}
+
+// ── SUBSCRIPTIONS ──────────────────────────────────────
+async function loadSubs() {
+  const el = document.getElementById('subsList');
+  try {
+    const r = await fetch(`${API}/api/admin/subscriptions`, { headers:{'X-Admin-Key':ADMIN_KEY} });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const all = d.subscriptions || [];
+    const now = new Date();
+    const withExpiry = all.map(s => {
+      let expiry = s.expiry ? new Date(s.expiry) : null;
+      if (!expiry && s.confirmed_at) { expiry=new Date(s.confirmed_at); expiry.setDate(expiry.getDate()+(s.days||30)); }
+      const active   = expiry ? expiry > now : false;
+      const daysLeft = expiry ? Math.max(0, Math.ceil((expiry-now)/86400000)) : 0;
+      return { ...s, expiry, active, daysLeft };
+    });
+    const activeCount = withExpiry.filter(s=>s.active).length;
+    document.getElementById('statSubs').textContent   = activeCount;
+    document.getElementById('statSubRev').textContent = '₹'+(all.length*200);
+    document.getElementById('subsBadge').textContent  = activeCount + ' active';
+    if (!withExpiry.length) { el.innerHTML='<div class="empty-state"><span>🎵</span>No subscribers yet</div>'; return; }
+    el.innerHTML = '';
+    withExpiry.sort((a,b)=>b.active-a.active).forEach(s=>el.appendChild(makeSubCard(s)));
+  } catch(e) { el.innerHTML=`<div class="empty-state">Could not load — ${esc(e.message)}</div>`; }
+}
+
+function makeSubCard(s) {
+  const card = document.createElement('div');
+  card.className = 'sub-card';
+  const ts = s.confirmed_at ? new Date(s.confirmed_at).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '–';
+  const exp = s.expiry ? new Date(s.expiry).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '–';
+  card.innerHTML = `
+    <div class="sub-dot" style="background:${s.active?'var(--green)':'var(--text-dim)'}"></div>
+    <div class="sub-info-text">
+      <div class="sub-status">${s.active?'⭐ Active':'⏰ Expired'} ${s.active?'· '+s.daysLeft+' day'+(s.daysLeft!==1?'s':'')+' left':''}</div>
+      <div class="sub-meta">UTR: ${esc(s.transaction_id||'–')} · Activated: ${ts} · Expires: ${exp}</div>
+    </div>
+    <div class="sub-amount">₹200</div>`;
+  return card;
+}
+
+// ── READ COUNTS ────────────────────────────────────────
+async function loadReads() {
+  const el = document.getElementById('readList');
+  try {
+    const r = await fetch(`${API}/api/admin/read-counts`, { headers:{'X-Admin-Key':ADMIN_KEY} });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const list = d.books || [];
+    const totalReads = list.reduce((s,b)=>s+(b.total_reads||0),0);
+    document.getElementById('statReads').textContent  = totalReads;
+    document.getElementById('readsBadge').textContent = totalReads + ' total';
+    if (!list.length) { el.innerHTML='<div class="empty-state"><span>🎵</span>No reads tracked yet</div>'; return; }
+    const maxReads = Math.max(...list.map(b=>b.total_reads||0), 1);
+    el.innerHTML = '';
+    const medals = ['🥇','🥈','🥉'];
+    list.forEach((b,i) => {
+      const card = document.createElement('div');
+      card.className = 'read-card';
+      const pct = Math.round(((b.total_reads||0)/maxReads)*100);
+      card.innerHTML = `
+        <div class="read-medal">${medals[i]||'🎵'}</div>
+        <div class="read-info">
+          <div class="read-title">${esc(b.title||b.book_id)}</div>
+          <div class="read-breakdown">Free: ${b.free_reads||0} · Subscribers: ${b.sub_reads||0}</div>
+          <div class="read-bar"><div class="read-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="read-count">${b.total_reads||0}</div>`;
+      el.appendChild(card);
+    });
+  } catch(e) { el.innerHTML=`<div class="empty-state">Could not load — ${esc(e.message)}</div>`; }
+}
+
+// ── HELPERS ────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+let _tt;
+function toast(msg, type='') {
+  const t=document.getElementById('toast'); t.textContent=msg; t.className='show'+(type?' '+type:'');
+  clearTimeout(_tt); _tt=setTimeout(()=>{t.className='';},3000);
+}
+</script>
+</body>
+</html>
