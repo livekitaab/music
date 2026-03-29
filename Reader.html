@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LiveKitaab — Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brown:       #a46636;
+    --brown-deep:  #7a4a22;
+    --brown-dark:  #3b2010;
+    --green:       #6bbf8e;
+    --green-light: #a2d5a1;
+    --cream:       #f6e9d7;
+    --cream-dark:  #ecdcc4;
+    --gold:        #f7e7b5;
+    --gold-deep:   #d4a853;
+    --text-dark:   #2a1a0e;
+    --text-mid:    #5c3d1e;
+    --text-light:  #8c6a45;
+    --shadow-sm:   0 2px 8px rgba(58,28,8,.10);
+    --shadow-md:   0 4px 20px rgba(58,28,8,.14);
+    --radius:      12px;
+    --radius-sm:   8px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  html { overflow: hidden; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--brown-dark);
+    color: var(--cream);
+    min-height: 100vh; min-height: 100dvh;
+    overflow-x: hidden; overflow-y: hidden;
+    width: 100%; max-width: 100vw;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .025;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  }
+
+  #readerApp {
+    position: relative; z-index: 1; display: flex; flex-direction: column;
+    height: 100vh; height: 100dvh; width: 100%; max-width: 100vw; overflow: hidden;
+  }
+
+  .reader-topbar {
+    background: var(--brown-dark); border-bottom: 1px solid rgba(246,233,215,.08);
+    padding: 0 12px; height: 52px; display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    position: relative; z-index: 50; width: 100%; max-width: 100vw; overflow: hidden;
+  }
+  .back-btn {
+    background: rgba(246,233,215,.08); border: none; color: var(--cream);
+    padding: 7px 10px; border-radius: 20px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: .8rem;
+    display: flex; align-items: center; gap: 5px;
+    transition: background .18s; white-space: nowrap; flex-shrink: 0;
+  }
+  .back-btn:hover { background: rgba(246,233,215,.15); }
+  @media (max-width: 360px) { .back-btn .back-label { display: none; } }
+  #readerBookTitle {
+    font-family: 'Playfair Display', serif; font-size: .88rem; font-weight: 600;
+    color: var(--gold); flex: 1; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+  .reader-controls { display: flex; gap: 5px; flex-shrink: 0; }
+  .ctrl-btn {
+    background: rgba(246,233,215,.08); border: none; color: var(--cream);
+    width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: .9rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .18s; min-width: 34px; min-height: 34px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ctrl-btn:hover { background: rgba(246,233,215,.16); }
+  .ctrl-btn.active { background: var(--green); color: var(--brown-dark); }
+
+  .chapter-drawer {
+    position: fixed; top: 52px; right: 0; width: min(280px, 88vw);
+    background: var(--brown-dark); border-left: 1px solid rgba(246,233,215,.10);
+    border-bottom: 1px solid rgba(246,233,215,.10); border-radius: 0 0 0 var(--radius);
+    box-shadow: -4px 4px 20px rgba(0,0,0,.45); z-index: 200; padding: 8px 0;
+    max-height: calc(100dvh - 52px); overflow-y: auto;
+    transform: translateX(110%); transition: transform .25s ease; max-width: 100vw;
+  }
+  .chapter-drawer.open { transform: translateX(0); }
+  .drawer-title {
+    font-family: 'Playfair Display', serif; font-size: .8rem; font-weight: 600;
+    color: var(--text-light); text-transform: uppercase;
+    letter-spacing: .08em; padding: 8px 18px 6px;
+  }
+  .chapter-item {
+    padding: 9px 18px; font-size: .84rem; cursor: pointer; color: var(--cream);
+    transition: background .15s; border-left: 3px solid transparent;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .chapter-item:hover { background: rgba(246,233,215,.07); }
+  .chapter-item.active { border-left-color: var(--green); color: var(--gold); font-weight: 500; }
+
+  .font-panel {
+    position: fixed; top: 52px; right: 0; background: var(--brown-dark);
+    border: 1px solid rgba(246,233,215,.10); border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius); padding: 14px 20px;
+    z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.3); display: none;
+  }
+  .font-panel.open { display: flex; align-items: center; gap: 14px; }
+  @media (max-width: 400px) { .font-panel { left: 0; right: 0; justify-content: center; } }
+  .fp-label { font-size: .78rem; color: var(--text-light); }
+  .fp-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: rgba(246,233,215,.08);
+    border: none; color: var(--cream); font-size: 1.1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background .15s;
+    -webkit-tap-highlight-color: transparent; min-width: 44px; min-height: 44px;
+  }
+  .fp-btn:hover { background: rgba(246,233,215,.18); }
+  #fpSize { min-width: 28px; text-align: center; font-size: .85rem; color: var(--gold); }
+
+  #readerScroll {
+    flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px 0 80px;
+    scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; width: 100%;
+  }
+  #readerScroll::-webkit-scrollbar { width: 4px; }
+  #readerScroll::-webkit-scrollbar-track { background: transparent; }
+  #readerScroll::-webkit-scrollbar-thumb { background: rgba(246,233,215,.15); border-radius: 3px; }
+
+  .chapter-card {
+    max-width: 680px; margin: 0 auto 24px; background: var(--cream);
+    border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 28px 32px;
+    position: relative; overflow: hidden; animation: cardIn .35s ease;
+    width: calc(100% - 24px); box-sizing: border-box;
+  }
+  @media (max-width: 600px) { .chapter-card { padding: 20px 16px; width: calc(100% - 16px); margin: 0 8px 16px; border-radius: var(--radius-sm); } }
+  @media (max-width: 380px) { .chapter-card { padding: 16px 14px; width: calc(100% - 12px); margin: 0 6px 14px; } }
+  @keyframes cardIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .chapter-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--green), var(--gold-deep));
+  }
+  .chapter-heading {
+    font-family: 'Playfair Display', serif; font-size: clamp(1rem, 4vw, 1.25rem); font-weight: 700;
+    color: var(--brown-deep); margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--cream-dark);
+  }
+
+  .text-paragraph {
+    font-family: 'Lora', serif; line-height: 1.85; margin-bottom: 0;
+    color: var(--text-dark); word-break: break-word; overflow-wrap: break-word;
+  }
+  .text-paragraph + .text-paragraph { margin-top: var(--para-gap, 16px); }
+  .span-bold      { font-weight: 700; }
+  .span-italic    { font-style: italic; }
+  .span-underline { text-decoration: underline; }
+
+  .gif-wrap { text-align: center; margin-bottom: var(--gif-gap, 12px); }
+  .gif-wrap img { max-width: 100%; width: auto; height: auto; border-radius: var(--radius-sm); display: inline-block; object-fit: contain; }
+
+  .chapter-divider { max-width: 680px; margin: 0 auto 20px; width: calc(100% - 24px); height: 1px; background: rgba(246,233,215,.08); }
+  @media (max-width: 600px) { .chapter-divider { width: calc(100% - 16px); margin: 0 8px 14px; } }
+
+  #musicBar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 80;
+    background: rgba(42,26,14,.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(246,233,215,.10);
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px)) 16px;
+    display: none; align-items: center; gap: 10px; width: 100%; box-sizing: border-box;
+  }
+  #musicBar.visible { display: flex; }
+  .music-icon { font-size: 1rem; color: var(--gold); flex-shrink: 0; }
+  .music-label { font-size: .76rem; color: var(--cream); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .music-btn {
+    background: rgba(246,233,215,.12); border: none; color: var(--cream);
+    width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 1rem; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent; transition: background .15s;
+  }
+  .music-btn:hover { background: rgba(246,233,215,.22); }
+
+  #loadingState {
+    max-width: 460px; width: 100%; margin: 60px auto; text-align: center;
+    color: var(--text-light); padding: 20px 24px; box-sizing: border-box;
+  }
+  #loadingState .icon { font-size: 2.8rem; margin-bottom: 14px; }
+  #loadingState h2 { font-family: 'Playfair Display', serif; color: var(--gold); margin-bottom: 8px; font-size: 1.2rem; }
+  #loadingState p { font-size: .84rem; font-family: 'Lora', serif; font-style: italic; line-height: 1.65; word-break: break-word; }
+  .open-file-btn {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
+    padding: 10px 24px; border-radius: 30px; background: var(--green); color: var(--brown-dark);
+    font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 500;
+    cursor: pointer; border: none; transition: background .18s;
+  }
+  .open-file-btn:hover { background: var(--green-light); }
+  #fileInput { display: none; }
+
+  .loader { display: flex; justify-content: center; gap: 7px; padding: 20px; }
+  .loader span { width: 8px; height: 8px; border-radius: 50%; background: var(--green); opacity: .3; animation: ld 1.2s infinite; }
+  .loader span:nth-child(2) { animation-delay: .2s; }
+  .loader span:nth-child(3) { animation-delay: .4s; }
+  @keyframes ld { 0%,80%,100%{ opacity:.3; transform:scale(1); } 40%{ opacity:1; transform:scale(1.4); } }
+
+  #toast {
+    position: fixed; bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    left: 50%; transform: translateX(-50%) translateY(60px);
+    background: var(--brown-dark); color: var(--cream); border: 1px solid rgba(246,233,215,.12);
+    padding: 9px 20px; border-radius: 30px; font-size: .8rem;
+    box-shadow: var(--shadow-md); transition: transform .3s ease; z-index: 999;
+    white-space: nowrap; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Next Chapter Button ── */
+  .next-chapter-wrap {
+    max-width: 680px; margin: 0 auto 32px;
+    width: calc(100% - 24px); text-align: center;
+  }
+  @media (max-width: 600px) { .next-chapter-wrap { width: calc(100% - 16px); margin: 0 8px 24px; } }
+  .next-chapter-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    color: var(--brown-dark); border: none; border-radius: 50px;
+    padding: 14px 32px; font-family: 'DM Sans', sans-serif;
+    font-size: .9rem; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(107,191,142,.35);
+    transition: all .22s; width: 100%; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .next-chapter-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(107,191,142,.45); }
+  .next-chapter-btn:active { transform: translateY(0); }
+  .next-chapter-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .next-chapter-btn .btn-spinner {
+    width: 16px; height: 16px; border: 2px solid rgba(59,32,16,.3);
+    border-top-color: var(--brown-dark); border-radius: 50%;
+    animation: spin .7s linear infinite; display: none;
+  }
+  .next-chapter-btn.loading .btn-spinner { display: block; }
+  .next-chapter-btn.loading .btn-arrow { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .end-of-book {
+    max-width: 680px; margin: 0 auto 40px;
+    width: calc(100% - 24px);
+    text-align: center; padding: 28px;
+    background: var(--cream); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+  @media (max-width: 600px) { .end-of-book { width: calc(100% - 16px); margin: 0 8px 32px; } }
+  .end-of-book-icon { font-size: 2rem; margin-bottom: 8px; }
+  .end-of-book-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--brown-deep); margin-bottom: 6px; }
+  .end-of-book-sub { font-family: 'Lora', serif; font-style: italic; font-size: .8rem; color: var(--text-light); }
+</style>
+</head>
+<body>
+<div id="readerApp">
+
+  <div class="reader-topbar">
+    <button class="back-btn" onclick="goBack()">← <span class="back-label">Library</span></button>
+    <span id="readerBookTitle">LiveKitaab — Reader</span>
+    <div class="reader-controls">
+      <button class="ctrl-btn" id="btnFont"     onclick="toggleFontPanel()" title="Font size">Aa</button>
+      <button class="ctrl-btn" id="btnChapters" onclick="toggleDrawer()"    title="Chapters">☰</button>
+    </div>
+  </div>
+
+  <div class="font-panel" id="fontPanel">
+    <span class="fp-label">Font</span>
+    <button class="fp-btn" onclick="adjustFont(-1)">−</button>
+    <span id="fpSize">16</span>
+    <button class="fp-btn" onclick="adjustFont(+1)">+</button>
+  </div>
+
+  <div class="chapter-drawer" id="chapterDrawer">
+    <div class="drawer-title">Chapters</div>
+    <div id="chapterList"></div>
+  </div>
+
+  <div id="readerScroll">
+    <div id="loadingState">
+      <div class="icon">📖</div>
+      <h2>Open a Book to Begin</h2>
+      <p>Select a book from the Library, or open an .lbk file directly from your device.</p>
+      <button class="open-file-btn" onclick="document.getElementById('fileInput').click()">
+        📂 Open File
+      </button>
+      <input type="file" id="fileInput" accept=".lbk" onchange="handleFileInput(this)">
+    </div>
+    <div id="readerContent" style="display:none; width:100%; max-width:100%; overflow-x:hidden;"></div>
+    <div class="loader" id="loaderDots" style="display:none;">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <div id="musicBar">
+    <span class="music-icon">🎵</span>
+    <span class="music-label" id="musicLabel">Background music</span>
+    <button class="music-btn" id="musicToggle" onclick="toggleMusic()">⏸</button>
+    <audio id="musicAudio" loop></audio>
+  </div>
+
+</div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════
+//  PROXY CONFIG
+//
+//  PROXY_BASE is just the endpoint — no ?url= here.
+//  resolveUrl() appends ?url=<encoded> when needed.
+//  Previous bug: CORS_PROXY already had ?url= in it, then
+//  resolveUrl appended another ?url=, making a double param.
+// ═══════════════════════════════════════════════════════════
+const PROXY_BASE = 'https://library-y7vs.onrender.com/proxy';
+const API_URL    = 'https://library-y7vs.onrender.com';
+
+// ═══════════════════════════════════════════════════════════
+//  URL RESOLVER — builds correct fetch URL for any source
+// ═══════════════════════════════════════════════════════════
+function resolveUrl(url) {
+  if (!url) return null;
+
+  // raw.githubusercontent.com — route through proxy for all sizes
+  if (/raw\.githubusercontent\.com/i.test(url)) {
+    return PROXY_BASE + '?url=' + encodeURIComponent(url);
+  }
+
+  // github.com/user/repo/blob/branch/path → convert to raw then proxy
+  const blobMatch = url.match(/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)/i);
+  if (blobMatch) {
+    const [, user, repo, branch, path] = blobMatch;
+    const raw = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+    return PROXY_BASE + '?url=' + encodeURIComponent(raw);
+  }
+
+  // GitHub Releases — always proxy (CDN blocks CORS)
+  if (/github\.com\/[^/]+\/[^/]+\/releases\/download\//i.test(url)) {
+    return PROXY_BASE + '?url=' + encodeURIComponent(url);
+  }
+
+  // Any other https URL — try direct
+  if (/^https?:\/\//i.test(url)) return url;
+
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MUSIC OBSERVER
+// ═══════════════════════════════════════════════════════════
+let _currentMusicUrl = null;
+
+const MusicObserver = new IntersectionObserver((entries) => {
+  let best = null;
+  entries.forEach(entry => {
+    if (!entry.target.dataset.musicUrl) return;
+    if (!best || entry.intersectionRatio > best.intersectionRatio) best = entry;
+  });
+  if (!best || best.intersectionRatio <= 0) return;
+
+  const url   = best.target.dataset.musicUrl;
+  const loop  = best.target.dataset.musicLoop === '1';
+  const vol   = parseFloat(best.target.dataset.musicVol || 0.7);
+  const title = best.target.dataset.musicTitle || '';
+
+  if (url === _currentMusicUrl) return;
+  _currentMusicUrl = url;
+
+  const audio = document.getElementById('musicAudio');
+  audio.pause();
+  audio.src = url; audio.loop = loop; audio.volume = vol;
+  document.getElementById('musicLabel').textContent = '♪ ' + title;
+  document.getElementById('musicBar').classList.add('visible');
+  document.getElementById('musicToggle').textContent = '⏸';
+  audio.play().catch(() => { document.getElementById('musicToggle').textContent = '▶'; });
+}, { root: null, rootMargin: '-10% 0px -10% 0px', threshold: [0, 0.1, 0.25, 0.5] });
+
+// ═══════════════════════════════════════════════════════════
+//  LBK PARSER
+//
+//  Books are now stored as individual .lbk files per chapter.
+//  library.json points to a chapters.json per book which lists
+//  each chapter's .lbk URL. The reader:
+//    1. Fetches chapters.json to get the chapter list
+//    2. Fetches + renders chapter 1 immediately
+//    3. Pre-fetches chapter 2 in background while user reads ch1
+//    4. Fetches each subsequent chapter on demand as user scrolls
+// ═══════════════════════════════════════════════════════════
+const LBKReader = {
+  // Parse a single .lbk ZIP buffer → { content, assets }
+  async parseLBK(arrayBuffer) {
+    const zip = await JSZip.loadAsync(arrayBuffer);
+
+    // Find content.json — handle both root level and inside a subfolder
+    let contentEntry = zip.file('content.json');
+    if (!contentEntry) {
+      // Some .lbk files nest content.json inside a folder — find it anywhere
+      const found = Object.keys(zip.files).find(n => n.endsWith('content.json') && !zip.files[n].dir);
+      if (found) contentEntry = zip.file(found);
+    }
+    if (!contentEntry) throw new Error('Invalid .lbk file: content.json not found.');
+
+    const json    = await contentEntry.async('string');
+    const content = JSON.parse(json);
+    const assets  = {};
+
+    for (const [name, entry] of Object.entries(zip.files)) {
+      if (entry.dir) continue;
+      if (name === 'content.json' || name.endsWith('/content.json')) continue;
+      assets[name] = URL.createObjectURL(await entry.async('blob'));
+    }
+    return { content, assets };
+  },
+
+  // Fetch and parse a .lbk from a URL (via proxy if needed)
+  async fetchLBK(url) {
+    const fetchUrl = resolveUrl(url);
+    if (!fetchUrl) throw new Error('Cannot resolve URL: ' + url);
+
+    let r;
+    try {
+      r = await fetch(fetchUrl, { cache: 'no-store' });
+    } catch (networkErr) {
+      // Retry once on network failure (common on mobile switching networks)
+      await new Promise(res => setTimeout(res, 1500));
+      r = await fetch(fetchUrl, { cache: 'no-store' });
+    }
+
+    if (!r.ok) throw new Error(`Could not load chapter (HTTP ${r.status}). Tap retry to try again.`);
+
+    const buf = await r.arrayBuffer();
+
+    if (buf.byteLength < 10) {
+      throw new Error('Chapter file is empty or connection was cut. Tap retry.');
+    }
+    const header = new Uint8Array(buf.slice(0, 4));
+    if (!(header[0] === 0x50 && header[1] === 0x4B)) {
+      throw new Error('Chapter file corrupted. Tap retry to load again.');
+    }
+    return LBKReader.parseLBK(buf);
+  },
+
+  // Fetch chapters.json → { meta, chapters: [{order, title, file}] }
+  // Always routes through proxy — chapters.json is on raw.githubusercontent.com
+  // which blocks CORS on most mobile browsers without the proxy.
+  async fetchChapterList(chaptersJsonUrl) {
+    // Route through proxy just like any other GitHub file
+    const fetchUrl = resolveUrl(chaptersJsonUrl) || chaptersJsonUrl;
+
+    let r;
+    try {
+      r = await fetch(fetchUrl, { cache: 'no-store' });
+    } catch (networkErr) {
+      // Network failure — retry once after a short delay
+      await new Promise(res => setTimeout(res, 1200));
+      r = await fetch(fetchUrl, { cache: 'no-store' });
+    }
+
+    if (!r.ok) throw new Error(`Could not load book list (HTTP ${r.status}). Check your connection and try again.`);
+
+    let data;
+    try {
+      data = await r.json();
+    } catch {
+      throw new Error('Book data appears corrupted. Please try again.');
+    }
+
+    const sorted = (data.chapters || []).slice().sort((a, b) => a.order - b.order);
+    return { meta: data, chapters: sorted };
+  },
+};
+
+// ═══════════════════════════════════════════════════════════
+//  RENDERER
+// ═══════════════════════════════════════════════════════════
+const Renderer = {
+  fontScale: 1.0, chapters: [], musicAudios: [],
+
+  // Render all chapters at once (used for .lbk single files)
+  renderBook(data, isClbk) {
+    const container = document.getElementById('readerContent');
+    container.innerHTML = ''; container.style.display = 'block';
+    this.chapters = []; this.stopAllMusic();
+    const items = isClbk
+      ? data.chapters
+      : [{ title: data.content.meta?.title || 'Chapter 1', content: data.content, assets: data.assets }];
+    items.forEach((ch, i) => {
+      if (i > 0) { const d = document.createElement('div'); d.className = 'chapter-divider'; container.appendChild(d); }
+      const card = this.renderChapter(ch, i);
+      container.appendChild(card);
+      this.chapters.push({ title: ch.title, el: card });
+    });
+    this.buildChapterList();
+    this.applyFontScale();
+  },
+
+  // Render the very first chapter and show it immediately
+  renderFirstChapter(ch) {
+    const container = document.getElementById('readerContent');
+    container.innerHTML = ''; container.style.display = 'block';
+    this.chapters = []; this.stopAllMusic();
+    const card = this.renderChapter(ch, 0);
+    container.appendChild(card);
+    this.chapters.push({ title: ch.title, el: card });
+    this.buildChapterList();
+    this.applyFontScale();
+  },
+
+  // Append one more chapter (called in background for chapters 2+)
+  appendChapter(ch) {
+    const container = document.getElementById('readerContent');
+    const idx = this.chapters.length;
+    const divider = document.createElement('div');
+    divider.className = 'chapter-divider';
+    container.appendChild(divider);
+    const card = this.renderChapter(ch, idx);
+    // Reveal smoothly
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(16px)';
+    container.appendChild(card);
+    this.chapters.push({ title: ch.title, el: card });
+    this.buildChapterList();
+    this.applyFontScale();
+    // Animate in
+    requestAnimationFrame(() => {
+      card.style.transition = 'opacity .4s ease, transform .4s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    });
+  },
+
+  renderChapter({ title, content, assets }, idx) {
+    const ps      = content.page_style  || {};
+    const music   = content.music       || {};
+    const spans   = content.spans       || [];
+    const defBold = content.default_style?.bold || false;
+    const bgColor   = ps.bg_color    || '#f5f4f0';
+    const textColor = ps.text_color  || '#1a1a1a';
+    const paraGap   = ps.line_spacing || 8;
+    const gifGap    = ps.gif_spacing  || 12;
+
+    const card = document.createElement('div');
+    card.className = 'chapter-card'; card.id = 'chapter-' + idx;
+    card.style.cssText += `--para-gap:${paraGap}px; --gif-gap:${gifGap}px;`;
+    card.style.background = bgColor; card.style.color = textColor;
+
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'chapter-heading'; h.textContent = title; h.style.color = textColor;
+      card.appendChild(h);
+    }
+    if (music.src && assets[music.src]) this.setupMusic(assets[music.src], music, card, title, idx);
+
+    this.groupParas(spans).forEach(para => {
+      if (para.type === 'gif') {
+        const wrap = document.createElement('div'); wrap.className = 'gif-wrap';
+        const url = assets[para.src];
+        if (url) {
+          const img = document.createElement('img');
+          img.src = url; img.alt = para.alt || '';
+          img.style.width  = para.width  ? Math.min(para.width,  600) + 'px' : 'auto';
+          img.style.height = para.height ? Math.min(para.height, 400) + 'px' : 'auto';
+          wrap.appendChild(img);
+        } else { wrap.textContent = '[Image not found]'; wrap.style.color = '#cc4444'; wrap.style.fontSize = '.8rem'; }
+        card.appendChild(wrap);
+      } else {
+        const p = document.createElement('p'); p.className = 'text-paragraph';
+        para.runs.forEach(run => {
+          const span = document.createElement('span');
+          span.textContent = run.content; span.style.color = run.style?.color || textColor;
+          if (run.style?.font_size) span.dataset.fontSize = run.style.font_size;
+          if (run.style?.bold || defBold) span.classList.add('span-bold');
+          if (run.style?.italic)          span.classList.add('span-italic');
+          if (run.style?.underline)       span.classList.add('span-underline');
+          if (run.style?.font_family && run.style.font_family !== 'Default')
+            span.style.fontFamily = `'${run.style.font_family}', serif`;
+          p.appendChild(span);
+        });
+        card.appendChild(p);
+      }
+    });
+    return card;
+  },
+
+  groupParas(spans) {
+    const result = []; let runs = [];
+    for (const sp of spans) {
+      if (sp.type === 'gif') { if (runs.length) { result.push({ type:'text', runs }); runs = []; } result.push({ type:'gif', ...sp }); continue; }
+      runs.push({ content: sp.content, style: sp.style });
+      if (sp.paragraph_end) { result.push({ type:'text', runs }); runs = []; }
+    }
+    if (runs.length) result.push({ type:'text', runs });
+    return result;
+  },
+
+  setupMusic(url, meta, card, title) {
+    card.dataset.musicUrl   = url;
+    card.dataset.musicLoop  = meta.loop !== false ? '1' : '0';
+    card.dataset.musicVol   = meta.volume ?? 0.7;
+    card.dataset.musicTitle = title;
+    MusicObserver.observe(card);
+    this.musicAudios.push({ url, title });
+  },
+
+  stopAllMusic() {
+    const a = document.getElementById('musicAudio');
+    a.pause(); a.src = '';
+    document.getElementById('musicBar').classList.remove('visible');
+    this.musicAudios = []; MusicObserver.disconnect();
+  },
+
+  buildChapterList() {
+    const list = document.getElementById('chapterList'); list.innerHTML = '';
+    this.chapters.forEach((ch, i) => {
+      const item = document.createElement('div');
+      item.className = 'chapter-item' + (i === 0 ? ' active' : '');
+      item.textContent = (i + 1) + '. ' + ch.title;
+      item.onclick = () => {
+        ch.el.scrollIntoView({ behavior:'smooth', block:'start' });
+        document.querySelectorAll('.chapter-item').forEach(x => x.classList.remove('active'));
+        item.classList.add('active'); closeDrawer();
+      };
+      list.appendChild(item);
+    });
+  },
+
+  applyFontScale() {
+    document.querySelectorAll('.text-paragraph span').forEach(sp => {
+      const base = parseFloat(sp.dataset.fontSize || 16);
+      sp.style.fontSize = (base * this.fontScale) + 'px';
+    });
+  },
+};
+
+// ═══════════════════════════════════════════════════════════
+//  FILE LOADING
+//
+//  Two entry points:
+//  A) loadFromChaptersJson(url) — multi-chapter books
+//     Loads chapter 1 only. Shows "Next Chapter" button at
+//     the end. Each chapter loads only when user taps the button.
+//  B) loadFile(arrayBuffer, filename) — single .lbk books
+// ═══════════════════════════════════════════════════════════
+
+// Chapter queue state
+let _chapterQueue   = [];   // remaining chapter metas [{title, file, order}]
+let _chapterIndex   = 1;    // how many chapters loaded so far
+let _loadingChapter = false;
+
+// Entry point A — multi-chapter books via chapters.json
+async function loadFromChaptersJson(chaptersJsonUrl, bookTitle, bookId, isFree) {
+  showLoader(true);
+  document.getElementById('loadingState').style.display = 'none';
+  _chapterQueue   = [];
+  _chapterIndex   = 1;
+  _loadingChapter = false;
+
+  try {
+    const { meta, chapters } = await LBKReader.fetchChapterList(chaptersJsonUrl);
+    const title = bookTitle || meta?.title || 'Book';
+    document.getElementById('readerBookTitle').textContent = title;
+
+    if (!chapters.length) throw new Error('No chapters found.');
+
+    // Fetch and render chapter 1 immediately
+    const ch1Data = await LBKReader.fetchLBK(chapters[0].file);
+    const ch1 = {
+      title:   chapters[0].title || ch1Data.content?.meta?.title || 'Chapter 1',
+      content: ch1Data.content,
+      assets:  ch1Data.assets
+    };
+    showLoader(false);
+    Renderer.renderFirstChapter(ch1);
+    showToast('📖 ' + title);
+    trackRead(bookId, title, isFree);
+
+    // Store remaining chapters in queue
+    _chapterQueue = chapters.slice(1);
+
+    // Show Next Chapter button or End of Book
+    appendNextChapterUI();
+
+  } catch (e) {
+    console.error(e);
+    showLoader(false);
+    const ls = document.getElementById('loadingState');
+    ls.style.display = 'block';
+    ls.querySelector('h2').textContent = '⚠ Could not load book';
+    ls.querySelector('p').innerHTML =
+      escHtml(e.message) +
+      '<br><br><button onclick="loadFromChaptersJson(' +
+        JSON.stringify(chaptersJsonUrl) + ',' +
+        JSON.stringify(bookTitle) + ',' +
+        JSON.stringify(bookId) + ',' +
+        JSON.stringify(isFree) +
+      ')" style="margin-top:8px;padding:9px 22px;background:var(--green);border:none;border-radius:20px;font-family:DM Sans,sans-serif;font-size:.85rem;font-weight:600;color:var(--brown-dark);cursor:pointer;">🔄 Tap to Retry</button>';
+  }
+}
+
+// Appends the Next Chapter button (or End of Book card) after last chapter
+function appendNextChapterUI() {
+  // Remove any existing next-chapter UI first
+  document.getElementById('nextChapterUI')?.remove();
+
+  const container = document.getElementById('readerContent');
+  const wrap = document.createElement('div');
+  wrap.id = 'nextChapterUI';
+
+  if (_chapterQueue.length > 0) {
+    const next = _chapterQueue[0];
+    const chNum = _chapterIndex + 1;
+    wrap.className = 'next-chapter-wrap';
+    wrap.innerHTML = `
+      <button class="next-chapter-btn" onclick="loadNextChapter()" id="nextChapterBtn">
+        <div class="btn-spinner"></div>
+        <span class="btn-arrow">📖</span>
+        <span class="btn-label">Next: ${escHtml(next.title || 'Chapter ' + chNum)}</span>
+        <span class="btn-arrow">→</span>
+      </button>`;
+  } else {
+    // No more chapters — end of book
+    wrap.className = 'end-of-book';
+    wrap.innerHTML = `
+      <div class="end-of-book-icon">✨</div>
+      <div class="end-of-book-title">End of Book</div>
+      <div class="end-of-book-sub">You've finished reading. Thank you!</div>`;
+  }
+
+  container.appendChild(wrap);
+}
+
+// Called when user taps "Next Chapter"
+async function loadNextChapter() {
+  if (_loadingChapter || _chapterQueue.length === 0) return;
+  _loadingChapter = true;
+
+  const btn = document.getElementById('nextChapterBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add('loading');
+    btn.querySelector('.btn-label').textContent = 'Loading…';
+  }
+
+  const chMeta = _chapterQueue.shift(); // take first from queue
+  _chapterIndex++;
+
+  try {
+    const parsed = await LBKReader.fetchLBK(chMeta.file);
+    const ch = {
+      title:   chMeta.title || parsed.content?.meta?.title || ('Chapter ' + _chapterIndex),
+      content: parsed.content,
+      assets:  parsed.assets
+    };
+
+    // Remove the Next Chapter button before appending chapter
+    document.getElementById('nextChapterUI')?.remove();
+
+    Renderer.appendChapter(ch);
+
+    // Scroll to new chapter smoothly
+    const newCard = document.getElementById('chapter-' + (Renderer.chapters.length - 1));
+    if (newCard) setTimeout(() => newCard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+    // Show next button or end of book
+    appendNextChapterUI();
+
+  } catch (e) {
+    console.error(e);
+    showToast('⚠ Could not load chapter: ' + e.message);
+    // Re-enqueue so user can retry
+    _chapterQueue.unshift(chMeta);
+    _chapterIndex--;
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.querySelector('.btn-label').textContent = 'Tap to retry';
+    }
+  } finally {
+    _loadingChapter = false;
+  }
+}
+
+// Entry point B — single .lbk file (local open or direct URL)
+async function loadFile(arrayBuffer, filename) {
+  showLoader(true);
+  _chapterQueue = []; // reset chapter state
+  try {
+    const bookData = await LBKReader.parseLBK(arrayBuffer);
+    document.getElementById('readerBookTitle').textContent =
+      bookData.content?.meta?.title || filename;
+    document.getElementById('loadingState').style.display = 'none';
+    Renderer.renderBook(bookData, false);
+    showToast('📖 Book loaded');
+    trackRead(book ? book.id : null, bookData.content?.meta?.title || filename, book ? book.price === 0 : true);
+  } catch (e) {
+    console.error(e);
+    showToast('⚠ Could not load file: ' + e.message);
+    document.getElementById('loadingState').style.display = 'block';
+  } finally {
+    showLoader(false);
+  }
+}
+
+function handleFileInput(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => loadFile(e.target.result, file.name);
+  reader.readAsArrayBuffer(file);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+const _basePath = (() => { const p = window.location.pathname; return p.substring(0, p.lastIndexOf('/')); })();
+function nav(page) { window.location.href = _basePath + '/' + page; }
+function navHref(page) { return _basePath + '/' + page; }
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('a[data-page]').forEach(a => { a.href = navHref(a.dataset.page); });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  READ TRACKING
+// ═══════════════════════════════════════════════════════════
+function trackRead(bookId, bookTitle, isFree) {
+  if (!bookId) return;
+  try {
+    fetch(`${API_URL}/api/track-download`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ book_id: bookId, title: bookTitle || bookId, is_free: !!isFree })
+    }).catch(() => {}); // fire and forget — never block reading
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT — load book from sessionStorage (set by Main.html)
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const bookJson = sessionStorage.getItem('pending_book');
+  if (!bookJson) return;
+  const book = JSON.parse(bookJson);
+  sessionStorage.removeItem('pending_book');
+
+  if (book.title) document.getElementById('readerBookTitle').textContent = book.title;
+
+  // ── Multi-chapter book: book.chapters points to a chapters.json URL ──
+  if (book.chapters) {
+    loadFromChaptersJson(book.chapters, book.title, book.id, book.price === 0);
+    return;
+  }
+
+  // ── Single .lbk file: book.file points directly to a .lbk URL ──
+  const rawUrl   = book.file || '';
+  const fetchUrl = resolveUrl(rawUrl);
+
+  if (!fetchUrl) {
+    const ls = document.getElementById('loadingState');
+    ls.style.display = 'block';
+    ls.querySelector('h2').textContent = 'Open "' + escHtml(book.title || 'book') + '"';
+    ls.querySelector('p').textContent  = 'Tap "Open File" and select the .lbk file.';
+    return;
+  }
+
+  showLoader(true);
+  document.getElementById('loadingState').style.display = 'none';
+
+  fetch(fetchUrl, { cache: 'no-store' })
+    .then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status} — ${r.statusText}`);
+      return r.arrayBuffer();
+    })
+    .then(buf => {
+      const header = new Uint8Array(buf.slice(0, 4));
+      const isPK = header[0] === 0x50 && header[1] === 0x4B;
+      if (!isPK || buf.byteLength < 100) {
+        throw new Error('File appears corrupted or incomplete. Please try again.');
+      }
+      return loadFile(buf, rawUrl);
+    })
+    .catch(e => {
+      showLoader(false);
+      const ls = document.getElementById('loadingState');
+      ls.style.display = 'block';
+      ls.querySelector('h2').textContent = '⚠ Download Failed';
+      ls.querySelector('p').innerHTML =
+        `Could not fetch <em>${escHtml(book.title || 'book')}</em>: ${escHtml(e.message)}<br><br>`
+        + `You can still read it: `
+        + `<a href="${escHtml(rawUrl)}" target="_blank" style="color:var(--green)">download the file</a>`
+        + ` then tap <b>Open File</b> below.`;
+    });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  UI CONTROLS
+// ═══════════════════════════════════════════════════════════
+function goBack() { nav('Main.html'); }
+
+function toggleDrawer() {
+  const d = document.getElementById('chapterDrawer'), btn = document.getElementById('btnChapters');
+  const open = d.classList.toggle('open'); btn.classList.toggle('active', open);
+  document.getElementById('fontPanel').classList.remove('open');
+  document.getElementById('btnFont').classList.remove('active');
+}
+function closeDrawer() {
+  document.getElementById('chapterDrawer').classList.remove('open');
+  document.getElementById('btnChapters').classList.remove('active');
+}
+function toggleFontPanel() {
+  const p = document.getElementById('fontPanel'), btn = document.getElementById('btnFont');
+  const open = p.classList.toggle('open'); btn.classList.toggle('active', open);
+  document.getElementById('chapterDrawer').classList.remove('open');
+  document.getElementById('btnChapters').classList.remove('active');
+}
+
+let fontSize = 16;
+function adjustFont(delta) {
+  fontSize = Math.min(24, Math.max(12, fontSize + delta));
+  document.getElementById('fpSize').textContent = fontSize;
+  Renderer.fontScale = fontSize / 16; Renderer.applyFontScale();
+}
+function toggleMusic() {
+  const audio = document.getElementById('musicAudio'), btn = document.getElementById('musicToggle');
+  if (audio.paused) { audio.play(); btn.textContent = '⏸'; }
+  else              { audio.pause(); btn.textContent = '▶'; }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('chapterDrawer').classList.contains('open')) { closeDrawer(); return; }
+    goBack();
+  }
+});
+document.addEventListener('click', e => {
+  const drawer = document.getElementById('chapterDrawer'), font = document.getElementById('fontPanel');
+  if (!drawer.contains(e.target) && !document.getElementById('btnChapters').contains(e.target)) drawer.classList.remove('open');
+  if (!font.contains(e.target)   && !document.getElementById('btnFont').contains(e.target))   font.classList.remove('open');
+});
+
+function showLoader(show) { document.getElementById('loaderDots').style.display = show ? 'flex' : 'none'; }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+</script>
+</body>
+</html>

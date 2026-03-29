@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiveKitaab Music — My Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --charcoal:      #1a1a1c;
+    --charcoal-deep: #111112;
+    --charcoal-mid:  #222226;
+    --charcoal-lift: #2c2c30;
+    --groove:        #0d0d0e;
+    --brown:         #7a4a22;
+    --brown-warm:    #a0622a;
+    --gold:          #d4a853;
+    --gold-bright:   #f0c060;
+    --gold-dim:      #2a1f08;
+    --gold-line:     #8a6a28;
+    --cream:         #f5ead8;
+    --text:          #f0e8d8;
+    --text-mid:      #a89878;
+    --text-dim:      #5a4e3a;
+    --red:           #c0392b;
+    --green:         #2ecc71;
+    --green-dim:     #0d2e1a;
+    --border:        rgba(212,168,83,.15);
+    --border-bright: rgba(212,168,83,.35);
+    --radius:        10px;
+    --shadow:        0 8px 32px rgba(0,0,0,.55);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--charcoal-deep);
+    color: var(--text); min-height: 100vh; overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(212,168,83,.018) 3px, rgba(212,168,83,.018) 4px);
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  #app { position: relative; z-index: 1; min-height: 100vh; }
+
+  /* ── NAV ─────────────────────────────────────────────── */
+  .topnav {
+    background: var(--groove); border-bottom: 1px solid var(--border-bright);
+    padding: 0 28px; height: 58px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,.7);
+  }
+  .topnav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .brand-record {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: conic-gradient(var(--charcoal-deep) 0deg 40deg, var(--charcoal-mid) 40deg 80deg, var(--charcoal-deep) 80deg 120deg, var(--charcoal-mid) 120deg 160deg, var(--charcoal-deep) 160deg 200deg, var(--charcoal-mid) 200deg 240deg, var(--charcoal-deep) 240deg 280deg, var(--charcoal-mid) 280deg 320deg, var(--charcoal-deep) 320deg 360deg);
+    border: 2px solid var(--gold); position: relative; flex-shrink: 0;
+    animation: spin 4s linear infinite paused;
+  }
+  .brand-record::after {
+    content: ''; position: absolute; inset: 50%; transform: translate(-50%,-50%);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold); box-shadow: 0 0 6px var(--gold-bright);
+  }
+  .brand-record:hover { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .brand-text { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .12em; line-height: 1; }
+  .brand-live { color: var(--text); }
+  .brand-kitaab { color: var(--gold); }
+  .brand-music { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: .72rem; color: var(--text-mid); letter-spacing: .18em; text-transform: uppercase; display: block; margin-top: 1px; }
+  .topnav-links { display: flex; gap: 4px; }
+  .topnav-links a { color: var(--text-mid); font-size: .8rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; transition: all .2s; }
+  .topnav-links a:hover { color: var(--gold); background: rgba(212,168,83,.08); }
+  .topnav-links a.active { color: var(--gold); }
+
+  .page-wrap { max-width: 680px; margin: 0 auto; padding: 28px 16px 80px; }
+
+  /* ── AUTH VIEW ───────────────────────────────────────── */
+  #authView { display: none; }
+
+  .auth-hero {
+    background: linear-gradient(160deg, var(--groove) 0%, var(--charcoal-mid) 100%);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 36px 28px 32px; position: relative; overflow: hidden;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .auth-hero::before {
+    content: ''; position: absolute; right: -40px; top: -40px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: conic-gradient(var(--charcoal-deep) 0deg 30deg, #1c1c1e 30deg 60deg, var(--charcoal-deep) 60deg 90deg, #1c1c1e 90deg 120deg, var(--charcoal-deep) 120deg 150deg, #1c1c1e 150deg 180deg, var(--charcoal-deep) 180deg 210deg, #1c1c1e 210deg 240deg, var(--charcoal-deep) 240deg 270deg, #1c1c1e 270deg 300deg, var(--charcoal-deep) 300deg 330deg, #1c1c1e 330deg 360deg);
+    border: 2px solid rgba(212,168,83,.2); opacity: .4;
+  }
+  .auth-hero-record {
+    width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+    background: conic-gradient(var(--groove) 0deg 20deg, #1c1c1e 20deg 40deg, var(--groove) 40deg 60deg, #1c1c1e 60deg 80deg, var(--groove) 80deg 100deg, #1c1c1e 100deg 120deg, var(--groove) 120deg 140deg, #1c1c1e 140deg 160deg, var(--groove) 160deg 180deg, #1c1c1e 180deg 200deg, var(--groove) 200deg 220deg, #1c1c1e 220deg 240deg, var(--groove) 240deg 260deg, #1c1c1e 260deg 280deg, var(--groove) 280deg 300deg, #1c1c1e 300deg 320deg, var(--groove) 320deg 340deg, #1c1c1e 340deg 360deg);
+    border: 2px solid var(--gold); position: relative;
+    box-shadow: 0 0 20px rgba(212,168,83,.2);
+    display: none;
+  }
+  @media (min-width:420px) { .auth-hero-record { display: block; } }
+  .auth-hero-record::after {
+    content: ''; position: absolute; inset: 50%; transform: translate(-50%,-50%);
+    width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle, var(--gold-bright) 0%, var(--gold) 100%);
+  }
+  .auth-hero-text { position: relative; z-index: 1; }
+  .auth-hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.5rem,5vw,2.2rem); letter-spacing: .1em; color: var(--text); line-height: 1; margin-bottom: 6px; }
+  .auth-hero-title span { color: var(--gold); }
+  .auth-hero-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--text-mid); font-size: .9rem; }
+
+  /* New sub welcome banner */
+  .new-sub-banner {
+    background: linear-gradient(120deg, #0a2018 0%, var(--green-dim) 100%);
+    border: 1px solid rgba(46,204,113,.25);
+    border-radius: var(--radius); margin: 16px 16px 0;
+    padding: 16px 18px; display: none; gap: 12px; align-items: flex-start;
+    box-shadow: 0 4px 20px rgba(46,204,113,.15);
+  }
+  .new-sub-banner.show { display: flex; }
+  .new-sub-banner-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .new-sub-banner-text h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: .08em; color: var(--green); margin-bottom: 4px; }
+  .new-sub-banner-text p { font-size: .76rem; color: var(--text-mid); line-height: 1.5; }
+
+  /* Auth card */
+  .auth-card {
+    background: var(--charcoal-mid); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px 20px; margin-bottom: 16px;
+    position: relative; overflow: hidden;
+  }
+  .auth-card::before {
+    content: ''; display: block; height: 2px; margin: -24px -20px 20px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-bright), var(--gold), transparent);
+  }
+
+  .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .auth-tab {
+    flex: 1; padding: 10px 8px; text-align: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: .95rem; letter-spacing: .1em;
+    cursor: pointer; color: var(--text-dim); border: none; background: transparent;
+    border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .18s;
+  }
+  .auth-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .auth-tab:hover:not(.active) { color: var(--text-mid); }
+
+  .auth-form { display: none; }
+  .auth-form.active { display: block; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: .62rem; font-weight: 500; color: var(--text-dim); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 6px; font-family: 'DM Mono', monospace; }
+  .form-input {
+    width: 100%; padding: 10px 14px; border-radius: 8px;
+    border: 1.5px solid var(--border); background: var(--charcoal-deep);
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: .85rem;
+    outline: none; transition: border-color .18s;
+  }
+  .form-input:focus { border-color: var(--gold-line); }
+  .form-input::placeholder { color: var(--text-dim); }
+
+  .btn-submit {
+    width: 100%; padding: 11px; border: none; border-radius: 8px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: .12em;
+    cursor: pointer; transition: all .18s; margin-top: 4px;
+    background: var(--gold); color: var(--charcoal-deep);
+  }
+  .btn-submit:hover { background: var(--gold-bright); }
+  .btn-submit.sub-mode { background: var(--green); color: var(--charcoal-deep); }
+
+  .form-footer { font-size: .72rem; color: var(--text-dim); text-align: center; margin-top: 12px; font-family: 'Cormorant Garamond', serif; font-style: italic; }
+  .form-footer a { color: var(--gold); text-decoration: none; }
+  .form-error { font-size: .76rem; color: var(--red); padding: 8px 12px; background: rgba(192,57,43,.1); border: 1px solid rgba(192,57,43,.2); border-radius: 6px; margin: 8px 0; display: none; }
+  .form-error.show { display: block; }
+
+  /* ── PROFILE VIEW ────────────────────────────────────── */
+  #profileView { display: none; }
+
+  .profile-hero {
+    background: linear-gradient(160deg, var(--groove) 0%, var(--charcoal-mid) 100%);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 28px; display: flex; align-items: center; gap: 20px;
+    position: relative; overflow: hidden;
+  }
+  .profile-hero::after {
+    content: ''; position: absolute; right: -30px; top: -30px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle at center, var(--gold-dim) 0%, transparent 70%); opacity: .5;
+  }
+
+  .avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: conic-gradient(var(--groove) 0deg 20deg, #1c1c1e 20deg 40deg, var(--groove) 40deg 60deg, #1c1c1e 60deg 80deg, var(--groove) 80deg 100deg, #1c1c1e 100deg 120deg, var(--groove) 120deg 140deg, #1c1c1e 140deg 160deg, var(--groove) 160deg 180deg, #1c1c1e 180deg 200deg, var(--groove) 200deg 220deg, #1c1c1e 220deg 240deg, var(--groove) 240deg 260deg, #1c1c1e 260deg 280deg, var(--groove) 280deg 300deg, #1c1c1e 300deg 320deg, var(--groove) 320deg 340deg, #1c1c1e 340deg 360deg);
+    border: 2px solid var(--gold); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--gold);
+    box-shadow: 0 0 16px rgba(212,168,83,.2);
+  }
+
+  .profile-info { position: relative; z-index: 1; }
+  .profile-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: .08em; color: var(--text); }
+  .profile-email { font-size: .75rem; color: var(--text-mid); margin-top: 2px; font-family: 'DM Mono', monospace; }
+  .profile-joined { font-size: .68rem; color: var(--text-dim); margin-top: 3px; font-family: 'Cormorant Garamond', serif; font-style: italic; }
+  .profile-sub-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: .65rem; font-weight: 700; padding: 3px 10px; border-radius: 12px;
+    margin-top: 6px; font-family: 'DM Mono', monospace; letter-spacing: .06em;
+  }
+  .profile-sub-badge.active { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,204,113,.2); }
+  .profile-sub-badge.inactive { background: var(--charcoal-lift); color: var(--text-dim); border: 1px solid var(--border); }
+
+  /* Section cards */
+  .section-card {
+    background: var(--charcoal-mid); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 14px;
+    position: relative; overflow: hidden;
+  }
+  .section-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: .95rem;
+    letter-spacing: .12em; color: var(--text-mid);
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* Sub info card */
+  .sub-info {
+    border-radius: 8px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+    border: 1px solid;
+  }
+  .sub-info.active { background: var(--green-dim); border-color: rgba(46,204,113,.2); }
+  .sub-info.inactive { background: var(--charcoal-lift); border-color: var(--border); }
+  .sub-info-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .sub-info-text h4 { font-family: 'Bebas Neue', sans-serif; font-size: .9rem; letter-spacing: .08em; margin-bottom: 3px; }
+  .sub-info.active .sub-info-text h4 { color: var(--green); }
+  .sub-info.inactive .sub-info-text h4 { color: var(--text-dim); }
+  .sub-info-text p { font-size: .72rem; color: var(--text-dim); font-family: 'DM Mono', monospace; }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .stat-box { background: var(--charcoal-lift); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid var(--border); }
+  .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--gold); letter-spacing: .04em; }
+  .stat-label { font-size: .6rem; color: var(--text-dim); margin-top: 3px; text-transform: uppercase; letter-spacing: .1em; font-family: 'DM Mono', monospace; }
+
+  /* Book list */
+  .book-list { display: flex; flex-direction: column; gap: 8px; }
+  .book-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px;
+    border-radius: 8px; background: var(--charcoal-lift); border: 1px solid var(--border);
+    cursor: pointer; transition: border-color .15s;
+  }
+  .book-item:hover { border-color: var(--gold-line); }
+  .book-thumb {
+    width: 36px; height: 48px; border-radius: 5px; flex-shrink: 0;
+    background: conic-gradient(var(--groove) 0deg 20deg, #1c1c1e 20deg 40deg, var(--groove) 40deg 60deg, #1c1c1e 60deg 80deg, var(--groove) 80deg 100deg, #1c1c1e 100deg 120deg, var(--groove) 120deg 140deg, #1c1c1e 140deg 160deg, var(--groove) 160deg 180deg, #1c1c1e 180deg 200deg, var(--groove) 200deg 220deg, #1c1c1e 220deg 240deg, var(--groove) 240deg 260deg, #1c1c1e 260deg 280deg, var(--groove) 280deg 300deg, #1c1c1e 300deg 320deg, var(--groove) 320deg 340deg, #1c1c1e 340deg 360deg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem;
+  }
+  .book-item-info { flex: 1; min-width: 0; }
+  .book-item-title { font-family: 'Cormorant Garamond', serif; font-size: .88rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .book-item-author { font-size: .68rem; color: var(--text-dim); margin-top: 2px; font-family: 'DM Mono', monospace; }
+  .read-btn {
+    padding: 5px 14px; border-radius: 14px; border: none;
+    background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold-line);
+    font-size: .72rem; font-weight: 600; cursor: pointer; transition: all .15s;
+    white-space: nowrap; font-family: 'DM Sans', sans-serif;
+  }
+  .read-btn:hover { background: var(--gold); color: var(--charcoal-deep); }
+
+  .empty-books { text-align: center; padding: 28px 16px; color: var(--text-dim); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: .9rem; }
+  .empty-books span { display: block; font-size: 1.8rem; margin-bottom: 8px; opacity: .4; }
+
+  /* Settings */
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: .82rem; color: var(--text-mid); }
+  .setting-value { font-size: .75rem; color: var(--text-dim); font-family: 'DM Mono', monospace; }
+  .btn-sm {
+    padding: 5px 14px; border-radius: 14px; border: 1px solid var(--border);
+    font-size: .72rem; font-weight: 500; cursor: pointer; transition: all .15s;
+    background: transparent; color: var(--text-dim); font-family: 'DM Sans', sans-serif;
+  }
+  .btn-sm:hover { border-color: var(--gold-line); color: var(--gold); }
+  .btn-sm.danger:hover { border-color: var(--red); color: var(--red); }
+
+  .signout-wrap { text-align: center; margin-top: 24px; }
+  .btn-signout {
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    padding: 9px 28px; border-radius: 24px; font-family: 'Bebas Neue', sans-serif;
+    font-size: .9rem; letter-spacing: .1em; cursor: pointer; transition: all .18s;
+  }
+  .btn-signout:hover { border-color: var(--red); color: var(--red); }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px);
+    background: var(--charcoal-lift); color: var(--text); border: 1px solid var(--border-bright);
+    padding: 10px 24px; border-radius: 30px; font-size: .76rem;
+    box-shadow: var(--shadow); transition: transform .3s ease; z-index: 999;
+    white-space: nowrap; font-family: 'DM Mono', monospace; letter-spacing: .04em;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- NAV -->
+  <nav class="topnav">
+    <a class="topnav-brand" href="#" data-page="Main.html">
+      <div class="brand-record"></div>
+      <div>
+        <div class="brand-text"><span class="brand-live">LIVE</span><span class="brand-kitaab">KITAAB</span></div>
+        <span class="brand-music">Music</span>
+      </div>
+    </a>
+    <div class="topnav-links">
+      <a href="#" data-page="Main.html">Library</a>
+      <a href="#" data-page="Reader.html">Reader</a>
+      <a class="active" href="#" data-page="Account.html">Account</a>
+    </div>
+  </nav>
+
+  <!-- ── LOGGED OUT ─────────────────────────────────────── -->
+  <div id="authView">
+    <div class="auth-hero">
+      <div class="auth-hero-record"></div>
+      <div class="auth-hero-text">
+        <div class="auth-hero-title" id="authBannerTitle">Welcome to <span>LiveKitaab Music</span></div>
+        <div class="auth-hero-sub" id="authBannerSub">Sign in to access your musical library</div>
+      </div>
+    </div>
+
+    <div class="new-sub-banner" id="newSubBanner">
+      <div class="new-sub-banner-icon">🎶</div>
+      <div class="new-sub-banner-text">
+        <h3>Subscription Approved!</h3>
+        <p id="newSubBannerText">Your ₹200 payment has been verified. Create your account to activate full library access on every device.</p>
+      </div>
+    </div>
+
+    <div class="page-wrap" style="padding-top:16px;">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab" id="tab-login"    onclick="switchAuthTab('login',this)">Sign In</button>
+          <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register',this)">Create Account</button>
+        </div>
+
+        <div class="auth-form" id="form-login">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <div class="form-error" id="login-error"></div>
+          <button class="btn-submit" id="login-btn" onclick="handleLogin()">Sign In →</button>
+          <p class="form-footer">Forgot password? <a href="#" onclick="showForgot()">Reset it</a></p>
+        </div>
+
+        <div class="auth-form" id="form-register">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input class="form-input" id="reg-name" type="text" placeholder="Your name" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="reg-email" type="email" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" id="reg-pass" type="password" placeholder="Min. 8 characters" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input class="form-input" id="reg-pass2" type="password" placeholder="Repeat password" autocomplete="new-password">
+          </div>
+          <div class="form-error" id="reg-error"></div>
+          <button class="btn-submit" id="reg-btn" onclick="handleRegister()">Create Account →</button>
+          <p class="form-footer">By registering you agree to our Terms &amp; Privacy Policy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LOGGED IN ──────────────────────────────────────── -->
+  <div id="profileView">
+    <div class="profile-hero">
+      <div class="avatar" id="avatarInitials">?</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileName">–</div>
+        <div class="profile-email" id="profileEmail">–</div>
+        <div class="profile-joined" id="profileJoined"></div>
+        <div id="profileSubBadge"></div>
+      </div>
+    </div>
+
+    <div class="page-wrap" style="padding-top:16px;">
+      <div id="subInfoCard"></div>
+
+      <div class="section-card">
+        <div class="section-title">📊 Stats</div>
+        <div class="stats-grid">
+          <div class="stat-box"><div class="stat-num" id="statFree">0</div><div class="stat-label">Free Books</div></div>
+          <div class="stat-box"><div class="stat-num" id="statDays">–</div><div class="stat-label">Days Left</div></div>
+          <div class="stat-box"><div class="stat-num" id="statSpent">₹0</div><div class="stat-label">Spent</div></div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">🎵 My Library</div>
+        <div class="book-list" id="bookList">
+          <div class="empty-books"><span>🎶</span>Loading your books…</div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">⚙ Account Settings</div>
+        <div class="setting-row">
+          <span class="setting-label">Email</span>
+          <span class="setting-value" id="settingEmail">–</span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Password</span>
+          <button class="btn-sm" onclick="showChangePassword()">Change</button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Local data</span>
+          <button class="btn-sm danger" onclick="clearData()">Clear</button>
+        </div>
+      </div>
+
+      <div class="signout-wrap">
+        <button class="btn-signout" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div id="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  FIREBASE CONFIG
+// ════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "AIzaSyAOUx2hi5LMebUVc_vlGQ_QEkBeMjQaaMo",
+  authDomain:        "livekitaab.firebaseapp.com",
+  projectId:         "livekitaab",
+  storageBucket:     "livekitaab.firebasestorage.app",
+  messagingSenderId: "387850236053",
+  appId:             "1:387850236053:web:babf8596ac3841aeddeb9c",
+  measurementId:     "G-1RY50RP54G"
+};
+if (typeof firebase === 'undefined') {
+  document.getElementById('authView').style.display = 'block';
+  document.getElementById('profileView').style.display = 'none';
+  const card = document.querySelector('.auth-card');
+  if (card) card.innerHTML = '<div style="padding:24px;text-align:center;color:#f87171;font-family:DM Mono,monospace;font-size:.82rem;line-height:1.7;">Could not load authentication.<br>Check your internet connection and reload.<br><br><button onclick="location.reload()" style="background:var(--gold);color:var(--charcoal-deep);border:none;padding:8px 22px;border-radius:20px;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:600;">Reload</button></div>';
+  throw new Error('Firebase SDK failed to load — check network connection.');
+}
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+const LIBRARY_URL = 'https://raw.githubusercontent.com/livekitaab/music/main/library.json';
+const _basePath = (()=>{ const p=window.location.pathname; return p.substring(0,p.lastIndexOf('/')); })();
+function nav(page) { window.location.href = _basePath+'/'+page; }
+function navHref(page) { return _basePath+'/'+page; }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── SUBSCRIPTION HELPERS ──────────────────────────────
+const SUB_KEY = 'lk_sub';
+function getLocalSub() { try { return JSON.parse(localStorage.getItem(SUB_KEY)||'null'); } catch { return null; } }
+function isLocalSubActive() { const s=getLocalSub(); return s?.expiry && new Date(s.expiry)>new Date(); }
+function getSubDaysLeft() { const s=getLocalSub(); if(!s?.expiry) return 0; return Math.max(0,Math.ceil((new Date(s.expiry)-new Date())/86400000)); }
+
+// ── NEW SUB FLAG ──────────────────────────────────────
+let _newSubData = null;
+function checkNewSubFlag() { try { const r=sessionStorage.getItem('lk_new_sub'); if(r) _newSubData=JSON.parse(r); } catch { _newSubData=null; } }
+function applyNewSubUI() {
+  if (!_newSubData) return;
+  const banner = document.getElementById('newSubBanner');
+  document.getElementById('newSubBannerText').textContent =
+    `Your ₹200 payment has been verified. Create your account to lock in your ${_newSubData.days||30}-day access across every device.`;
+  banner.classList.add('show');
+  document.getElementById('authBannerTitle').innerHTML = '🎶 Payment <span>Approved!</span>';
+  document.getElementById('authBannerSub').textContent = 'One last step — create your account to activate your subscription.';
+  const regTab = document.getElementById('tab-register');
+  if (regTab) switchAuthTab('register', regTab);
+  const regBtn = document.getElementById('reg-btn');
+  if (regBtn) { regBtn.classList.add('sub-mode'); regBtn.textContent = 'Create Account & Activate →'; }
+}
+
+// ── BOOT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('a[data-page]').forEach(a => { a.href = navHref(a.dataset.page); });
+  checkNewSubFlag();
+  document.getElementById('authView').style.display    = 'none';
+  document.getElementById('profileView').style.display = 'none';
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      if (_newSubData) { await writeSubToFirestore(user, _newSubData); sessionStorage.removeItem('lk_new_sub'); _newSubData=null; showToast('⭐ Subscription activated!'); }
+      showProfile(user);
+    } else {
+      showAuth();
+      if (_newSubData) applyNewSubUI();
+    }
+  });
+});
+
+function showAuth() { document.getElementById('authView').style.display='block'; document.getElementById('profileView').style.display='none'; }
+
+async function showProfile(user) {
+  document.getElementById('authView').style.display    = 'none';
+  document.getElementById('profileView').style.display = 'block';
+  const profile = await loadFirestoreProfile(user);
+  const name    = profile?.name || user.displayName || nameFromEmail(user.email);
+  const joined  = user.metadata.creationTime;
+  document.getElementById('profileName').textContent    = name;
+  document.getElementById('profileEmail').textContent   = user.email;
+  document.getElementById('settingEmail').textContent   = user.email;
+  document.getElementById('avatarInitials').textContent = name.charAt(0).toUpperCase();
+  if (joined) document.getElementById('profileJoined').textContent = 'Member since '+new Date(joined).toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  const subInfo = await resolveSubscription(user, profile);
+  renderSubUI(subInfo);
+  renderStats(subInfo);
+  loadBooks(profile, subInfo);
+}
+
+// ── FIRESTORE ─────────────────────────────────────────
+async function loadFirestoreProfile(user) {
+  try { const d=await db.collection('users').doc(user.uid).get(); return d.exists?d.data():null; } catch { return null; }
+}
+async function saveFirestoreProfile(user, name) {
+  try { await db.collection('users').doc(user.uid).set({ name, email:user.email, updated:firebase.firestore.FieldValue.serverTimestamp() }, {merge:true}); } catch(e) { console.warn(e); }
+}
+async function writeSubToFirestore(user, subData) {
+  try {
+    const expiry=new Date(); expiry.setDate(expiry.getDate()+(subData.days||30));
+    await db.collection('users').doc(user.uid).set({
+      subscription: { code:subData.code||'APPROVED', days:subData.days||30, expiry:expiry.toISOString(), activated:new Date().toISOString() },
+      updated: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true});
+    localStorage.setItem(SUB_KEY, JSON.stringify({ code:subData.code, expiry:expiry.toISOString() }));
+  } catch(e) { console.warn(e); }
+}
+async function resolveSubscription(user, profile) {
+  const fsub = profile?.subscription;
+  if (fsub?.expiry) {
+    const expiry=new Date(fsub.expiry); const active=expiry>new Date();
+    const days=active?Math.ceil((expiry-new Date())/86400000):0;
+    if (active) localStorage.setItem(SUB_KEY, JSON.stringify({ code:fsub.code||'FIRESTORE', expiry:fsub.expiry }));
+    return { active, days, expiry, source:'firestore' };
+  }
+  const local=getLocalSub();
+  if (local?.expiry) {
+    const expiry=new Date(local.expiry); const active=expiry>new Date();
+    const days=active?Math.ceil((expiry-new Date())/86400000):0;
+    if (active) await writeSubToFirestore(user,{code:local.code,days});
+    return { active, days, expiry, source:'local' };
+  }
+  return { active:false, days:0 };
+}
+
+// ── SUB UI ────────────────────────────────────────────
+function renderSubUI(sub) {
+  const badge = document.getElementById('profileSubBadge');
+  badge.innerHTML = sub.active
+    ? `<span class="profile-sub-badge active">⭐ Subscribed · ${sub.days} day${sub.days!==1?'s':''} left</span>`
+    : `<span class="profile-sub-badge inactive">No active subscription</span>`;
+
+  const card = document.getElementById('subInfoCard');
+  if (sub.active) {
+    const exp = new Date(sub.expiry).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+    card.innerHTML = `<div class="sub-info active"><div class="sub-info-icon">⭐</div><div class="sub-info-text"><h4>Active Subscription</h4><p>Full library access until ${exp} · ${sub.days} day${sub.days!==1?'s':''} remaining</p></div></div>`;
+  } else {
+    card.innerHTML = `<div class="sub-info inactive"><div class="sub-info-icon">🎵</div><div class="sub-info-text"><h4>No Active Subscription</h4><p>Subscribe for ₹200/month to unlock the full musical research library.</p></div></div>`;
+  }
+}
+function renderStats(sub) {
+  document.getElementById('statFree').textContent  = '–';
+  document.getElementById('statDays').textContent  = sub.active ? sub.days : '–';
+  document.getElementById('statSpent').textContent = sub.active ? '₹200' : '₹0';
+}
+
+// ── BOOKS ─────────────────────────────────────────────
+async function loadBooks(profile, sub) {
+  let allBooks = [];
+  try {
+    const r = await fetch(LIBRARY_URL);
+    const j = await r.json();
+    allBooks = j.books || [];
+    sessionStorage.setItem('music_library_cache', JSON.stringify(j));
+  } catch {
+    const cached = sessionStorage.getItem('music_library_cache');
+    if (cached) allBooks = JSON.parse(cached).books || [];
+  }
+
+  const list = document.getElementById('bookList');
+  const readable = allBooks.filter(b => b.file || b.chapters);
+
+  if (!sub.active && !readable.some(b=>b.price===0)) {
+    list.innerHTML = `<div class="empty-books"><span>🎵</span>Subscribe for ₹200/month to access the full library.</div>`;
+    document.getElementById('statFree').textContent = 0;
+    return;
+  }
+
+  const toShow = sub.active ? readable : readable.filter(b=>b.price===0);
+  document.getElementById('statFree').textContent = readable.filter(b=>b.price===0).length;
+
+  if (!toShow.length) { list.innerHTML = `<div class="empty-books"><span>🎵</span>No books available yet.</div>`; return; }
+  list.innerHTML = '';
+  toShow.forEach(book => {
+    const item = document.createElement('div');
+    item.className = 'book-item';
+    item.innerHTML = `
+      <div class="book-thumb">🎵</div>
+      <div class="book-item-info">
+        <div class="book-item-title">${escHtml(book.title)}</div>
+        <div class="book-item-author">${escHtml(book.author||'')}</div>
+      </div>
+      <button class="read-btn" onclick='openBook(${JSON.stringify(book)})'>▶ Read</button>`;
+    list.appendChild(item);
+  });
+}
+function openBook(book) {
+  sessionStorage.setItem('pending_book', JSON.stringify(book));
+  nav('Reader.html');
+}
+
+// ── AUTH ──────────────────────────────────────────────
+function switchAuthTab(key, el) {
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('form-'+key).classList.add('active');
+  document.querySelectorAll('.form-error').forEach(e=>e.classList.remove('show'));
+}
+async function handleLogin() {
+  const email=document.getElementById('login-email').value.trim(), pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showErr('login-error','Please fill all fields.');return;}
+  document.querySelectorAll('.form-error').forEach(e=>e.classList.remove('show'));
+  setLoading('login-btn',true);
+  try { await auth.signInWithEmailAndPassword(email,pass); showToast('Welcome back!'); }
+  catch(e){showErr('login-error',fbErr(e));}
+  finally{setLoading('login-btn',false);}
+}
+async function handleRegister() {
+  const name=document.getElementById('reg-name').value.trim(), email=document.getElementById('reg-email').value.trim();
+  const pass=document.getElementById('reg-pass').value, pass2=document.getElementById('reg-pass2').value;
+  if(!name||!email||!pass){showErr('reg-error','Please fill all fields.');return;}
+  if(pass!==pass2){showErr('reg-error','Passwords do not match.');return;}
+  if(pass.length<8){showErr('reg-error','Password must be at least 8 characters.');return;}
+  document.querySelectorAll('.form-error').forEach(e=>e.classList.remove('show'));
+  setLoading('reg-btn',true);
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email,pass);
+    await cred.user.updateProfile({displayName:name});
+    await saveFirestoreProfile(cred.user,name);
+    if (_newSubData) {
+      await writeSubToFirestore(cred.user,_newSubData);
+      sessionStorage.removeItem('lk_new_sub'); _newSubData=null;
+      showToast('🎶 Account created & subscription activated!');
+    } else { showToast('Account created! Welcome, '+name+'!'); }
+  } catch(e){showErr('reg-error',fbErr(e));}
+  finally{setLoading('reg-btn',false);}
+}
+async function showForgot() {
+  const email=document.getElementById('login-email').value.trim();
+  if(!email){showErr('login-error','Enter your email above first.');return;}
+  try{await auth.sendPasswordResetEmail(email);showToast('Reset email sent — check your inbox.');}
+  catch(e){showErr('login-error',fbErr(e));}
+}
+async function showChangePassword() {
+  const user=auth.currentUser; if(!user) return;
+  try{await auth.sendPasswordResetEmail(user.email);showToast('Reset email sent to '+user.email);}
+  catch(e){showToast('Could not send reset email.');}
+}
+async function signOut() { await auth.signOut(); showToast('Signed out — see you soon!'); }
+function clearData() {
+  if(!confirm('Clear local subscription data? Your account is safe.')) return;
+  localStorage.removeItem('lk_sub'); localStorage.removeItem('lk_sub_utrs');
+  showToast('Local data cleared.'); location.reload();
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function setLoading(btnId,loading) { const b=document.getElementById(btnId); if(!b) return; b.disabled=loading; b.style.opacity=loading?'0.6':'1'; }
+function showErr(id,msg) { const e=document.getElementById(id); if(!e) return; e.textContent=msg; e.classList.add('show'); }
+function nameFromEmail(email) { const p=email.split('@')[0].replace(/[._]/g,' '); return p.charAt(0).toUpperCase()+p.slice(1); }
+function fbErr(e) {
+  const map={'auth/user-not-found':'No account found with that email.','auth/wrong-password':'Incorrect password.','auth/email-already-in-use':'An account with that email already exists.','auth/weak-password':'Password must be at least 6 characters.','auth/invalid-email':'Please enter a valid email address.','auth/too-many-requests':'Too many attempts. Please wait.','auth/network-request-failed':'Network error — check your connection.','auth/invalid-credential':'Incorrect email or password.'};
+  return map[e.code]||e.message;
+}
+let toastTimer;
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
