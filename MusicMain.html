@@ -3,697 +3,421 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LiveKitaab Music — Musical Research Library</title>
+<title>LiveKitaab — Book Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root {
-    --charcoal:      #1a1a1c;
-    --charcoal-deep: #111112;
-    --charcoal-mid:  #222226;
-    --charcoal-lift: #2c2c30;
-    --groove:        #0d0d0e;
-    --brown:         #7a4a22;
-    --brown-warm:    #a0622a;
-    --brown-light:   #c8894e;
-    --gold:          #d4a853;
-    --gold-bright:   #f0c060;
-    --gold-dim:      #2a1f08;
-    --gold-line:     #8a6a28;
-    --cream:         #f5ead8;
-    --cream-dim:     #e8d8bc;
-    --text:          #f0e8d8;
-    --text-mid:      #a89878;
-    --text-dim:      #5a4e3a;
-    --red:           #c0392b;
-    --green:         #2ecc71;
-    --green-dim:     #0d2e1a;
-    --border:        rgba(212,168,83,.15);
-    --border-bright: rgba(212,168,83,.35);
-    --radius:        10px;
-    --shadow:        0 8px 32px rgba(0,0,0,.55);
+    --brown:       #a46636;
+    --brown-deep:  #7a4a22;
+    --brown-dark:  #3b2010;
+    --green:       #6bbf8e;
+    --green-light: #a2d5a1;
+    --green-dark:  #3d7a56;
+    --cream:       #f6e9d7;
+    --cream-dark:  #ecdcc4;
+    --cream-deeper:#e0cdb0;
+    --gold:        #f7e7b5;
+    --gold-deep:   #d4a853;
+    --text-dark:   #2a1a0e;
+    --text-mid:    #5c3d1e;
+    --text-light:  #8c6a45;
+    --shadow-md:   0 4px 20px rgba(58,28,8,.14);
+    --shadow-lg:   0 8px 40px rgba(58,28,8,.22);
+    --radius:      12px;
+    --radius-sm:   8px;
   }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; }
+  body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--text-dark); min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); }
+  #app { position:relative; z-index:1; display:flex; flex-direction:column; min-height:100vh; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--charcoal-deep);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  /* Nav */
+  .topnav { background:var(--brown-dark); padding:0 24px; height:52px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 10px rgba(0,0,0,.35); position:sticky; top:0; z-index:100; }
+  .topnav-brand { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--gold); letter-spacing:.02em; text-decoration:none; }
+  .topnav-links { display:flex; gap:6px; align-items:center; }
+  .topnav-links a { color:var(--cream); font-size:.82rem; text-decoration:none; padding:5px 12px; border-radius:20px; transition:background .2s,color .2s; }
+  .topnav-links a:hover { background:rgba(246,233,215,.12); color:var(--gold); }
+  .topnav-links .btn-account { background:var(--green); color:var(--brown-dark); font-weight:500; padding:5px 16px; }
+  .topnav-links .btn-account:hover { background:var(--green-light); }
 
-  /* ── VINYL GROOVE TEXTURE ──────────────────────────────── */
-  body::before {
-    content: '';
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 3px,
-        rgba(212,168,83,.018) 3px,
-        rgba(212,168,83,.018) 4px
-      );
-  }
-  body::after {
-    content: '';
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    opacity: .06;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+  /* Banner */
+  .banner { background:linear-gradient(120deg,var(--green) 0%,var(--green-light) 55%,var(--gold-deep) 100%); padding:36px 32px 32px; display:flex; align-items:center; gap:20px; position:relative; overflow:hidden; }
+  .banner::after { content:'📚'; position:absolute; right:-10px; bottom:-18px; font-size:110px; opacity:.10; pointer-events:none; transform:rotate(-8deg); }
+  .banner-icon { font-size:2.6rem; flex-shrink:0; filter:drop-shadow(0 2px 6px rgba(0,0,0,.15)); }
+  .banner-text h1 { font-family:'Playfair Display',serif; font-size:clamp(1.5rem,4vw,2rem); font-weight:900; color:var(--brown-dark); line-height:1.15; }
+  .banner-text p { font-family:'Lora',serif; font-style:italic; color:var(--brown-deep); font-size:.9rem; margin-top:5px; }
 
-  #app { position: relative; z-index: 1; min-height: 100vh; }
+  /* Filter */
+  .filter-bar { background:var(--cream-dark); border-bottom:1.5px solid var(--cream-deeper); padding:10px 20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .filter-label { font-size:.78rem; font-weight:500; color:var(--text-light); text-transform:uppercase; letter-spacing:.08em; margin-right:4px; }
+  .chip { display:inline-flex; align-items:center; gap:5px; padding:4px 14px; border-radius:20px; font-size:.8rem; cursor:pointer; transition:all .2s; border:1.5px solid var(--brown); color:var(--brown); background:transparent; font-family:'DM Sans',sans-serif; white-space:nowrap; }
+  .chip.active { background:var(--green); border-color:var(--green); color:var(--brown-dark); font-weight:500; }
+  .chip:hover:not(.active) { background:rgba(164,102,54,.07); }
+  .filter-spacer { flex:1; }
+  #statusText { font-size:.78rem; color:var(--text-light); font-style:italic; }
 
-  /* ── TOP NAV ───────────────────────────────────────────── */
-  .topnav {
-    background: var(--groove);
-    border-bottom: 1px solid var(--border-bright);
-    padding: 0 28px; height: 58px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 20px rgba(0,0,0,.7);
-  }
-  .topnav-brand {
-    display: flex; align-items: center; gap: 12px; text-decoration: none;
-  }
-  .brand-record {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: conic-gradient(
-      var(--charcoal-deep) 0deg 40deg,
-      var(--charcoal-mid) 40deg 80deg,
-      var(--charcoal-deep) 80deg 120deg,
-      var(--charcoal-mid) 120deg 160deg,
-      var(--charcoal-deep) 160deg 200deg,
-      var(--charcoal-mid) 200deg 240deg,
-      var(--charcoal-deep) 240deg 280deg,
-      var(--charcoal-mid) 280deg 320deg,
-      var(--charcoal-deep) 320deg 360deg
-    );
-    border: 2px solid var(--gold);
-    position: relative; flex-shrink: 0;
-    animation: spin 4s linear infinite paused;
-  }
-  .brand-record::after {
-    content: ''; position: absolute; inset: 50%; transform: translate(-50%,-50%);
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--gold); box-shadow: 0 0 6px var(--gold-bright);
-  }
-  .brand-record:hover { animation-play-state: running; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* Tabs */
+  .tab-strip { display:flex; background:var(--brown-dark); border-bottom:2px solid rgba(164,102,54,.35); position:sticky; top:52px; z-index:90; }
+  .tab-btn { flex:1; padding:13px 8px; text-align:center; font-family:'DM Sans',sans-serif; font-size:.84rem; font-weight:500; color:rgba(246,233,215,.55); cursor:pointer; border:none; background:transparent; transition:all .2s; border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; }
+  .tab-btn.active { color:var(--gold); border-bottom-color:var(--gold-deep); }
+  .tab-btn:hover:not(.active) { color:var(--cream); background:rgba(246,233,215,.06); }
+  .tab-btn.crosslink { color:rgba(212,168,83,.6); border-left:1px solid rgba(164,102,54,.25); }
+  .tab-btn.crosslink:hover { color:var(--gold); background:rgba(212,168,83,.08); }
 
-  .brand-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem; letter-spacing: .12em; line-height: 1;
-  }
-  .brand-live { color: var(--text); }
-  .brand-kitaab { color: var(--gold); }
-  .brand-music {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic; font-size: .72rem; font-weight: 400;
-    color: var(--text-mid); letter-spacing: .18em;
-    text-transform: uppercase; display: block; margin-top: 1px;
-  }
-
-  .topnav-links { display: flex; gap: 4px; align-items: center; }
-  .topnav-links a {
-    color: var(--text-mid); font-size: .8rem; text-decoration: none;
-    padding: 6px 14px; border-radius: 20px;
-    transition: all .2s; letter-spacing: .04em;
-  }
-  .topnav-links a:hover { color: var(--gold); background: rgba(212,168,83,.08); }
-  .topnav-links a.active { color: var(--gold); }
-
-  /* ── HERO ──────────────────────────────────────────────── */
-  .hero {
-    background: linear-gradient(160deg, var(--charcoal-deep) 0%, var(--charcoal-mid) 60%, #1e1508 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 40px 28px 32px;
-    position: relative; overflow: hidden;
-    display: flex; align-items: center; gap: 28px;
-  }
-  .hero::before {
-    content: '';
-    position: absolute; right: -60px; top: -60px;
-    width: 280px; height: 280px; border-radius: 50%;
-    background: conic-gradient(
-      var(--charcoal-deep) 0deg 30deg,
-      #1c1c1e 30deg 60deg,
-      var(--charcoal-deep) 60deg 90deg,
-      #1c1c1e 90deg 120deg,
-      var(--charcoal-deep) 120deg 150deg,
-      #1c1c1e 150deg 180deg,
-      var(--charcoal-deep) 180deg 210deg,
-      #1c1c1e 210deg 240deg,
-      var(--charcoal-deep) 240deg 270deg,
-      #1c1c1e 270deg 300deg,
-      var(--charcoal-deep) 300deg 330deg,
-      #1c1c1e 330deg 360deg
-    );
-    border: 3px solid rgba(212,168,83,.2);
-    opacity: .5;
-  }
-  .hero::after {
-    content: ''; position: absolute; right: -20px; top: -20px;
-    width: 200px; height: 200px; border-radius: 50%;
-    background: radial-gradient(circle at center, var(--gold-dim) 0%, transparent 70%);
-    opacity: .4;
-  }
-  .hero-vinyl {
-    width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
-    background: conic-gradient(
-      var(--groove) 0deg 20deg,
-      #1c1c1e 20deg 40deg,
-      var(--groove) 40deg 60deg,
-      #1c1c1e 60deg 80deg,
-      var(--groove) 80deg 100deg,
-      #1c1c1e 100deg 120deg,
-      var(--groove) 120deg 140deg,
-      #1c1c1e 140deg 160deg,
-      var(--groove) 160deg 180deg,
-      #1c1c1e 180deg 200deg,
-      var(--groove) 200deg 220deg,
-      #1c1c1e 220deg 240deg,
-      var(--groove) 240deg 260deg,
-      #1c1c1e 260deg 280deg,
-      var(--groove) 280deg 300deg,
-      #1c1c1e 300deg 320deg,
-      var(--groove) 320deg 340deg,
-      #1c1c1e 340deg 360deg
-    );
-    border: 3px solid var(--gold);
-    position: relative; box-shadow: 0 0 30px rgba(212,168,83,.25), var(--shadow);
-    animation: spin 8s linear infinite;
-    display: none;
-  }
-  @media (min-width: 480px) { .hero-vinyl { display: block; } }
-  .hero-vinyl::after {
-    content: ''; position: absolute;
-    inset: 50%; transform: translate(-50%,-50%);
-    width: 18px; height: 18px; border-radius: 50%;
-    background: radial-gradient(circle, var(--gold-bright) 0%, var(--gold) 100%);
-    box-shadow: 0 0 10px var(--gold-bright);
-  }
-
-  .hero-text { position: relative; z-index: 1; }
-  .hero-eyebrow {
-    font-family: 'DM Mono', monospace; font-size: .65rem;
-    color: var(--gold); letter-spacing: .2em; text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .hero-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(1.8rem, 6vw, 2.8rem);
-    letter-spacing: .08em; line-height: 1;
-    color: var(--text); margin-bottom: 8px;
-  }
-  .hero-title span { color: var(--gold); }
-  .hero-sub {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic; font-size: clamp(.88rem, 2.5vw, 1rem);
-    color: var(--text-mid); line-height: 1.5;
-  }
-
-  /* ── FILTER BAR ────────────────────────────────────────── */
-  .filter-bar {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 28px; background: var(--charcoal-mid);
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .filter-label {
-    font-size: .65rem; color: var(--text-dim);
-    text-transform: uppercase; letter-spacing: .12em;
-    font-family: 'DM Mono', monospace;
-  }
-  .chip {
-    padding: 5px 14px; border-radius: 20px;
-    background: var(--charcoal-lift); border: 1px solid var(--border);
-    color: var(--text-mid); font-size: .75rem; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; transition: all .2s;
-  }
-  .chip:hover, .chip.active { background: var(--gold-dim); border-color: var(--gold-line); color: var(--gold); }
-  .filter-spacer { flex: 1; }
-  .status-text { font-size: .72rem; color: var(--text-dim); font-family: 'DM Mono', monospace; }
-  #subBanner {
-    font-size: .75rem; font-weight: 600; letter-spacing: .04em;
-    padding: 5px 16px; border-radius: 20px; cursor: pointer;
-    border: 1px solid var(--gold-line); background: var(--gold-dim); color: var(--gold);
-    transition: all .2s; font-family: 'DM Sans', sans-serif;
-  }
-  #subBanner:hover { background: var(--gold); color: var(--charcoal-deep); }
-
-  /* ── TABS ──────────────────────────────────────────────── */
-  .tab-strip {
-    display: flex; background: var(--groove);
-    border-bottom: 1px solid var(--border-bright);
-    position: sticky; top: 58px; z-index: 90;
-  }
-  .tab-btn {
-    flex: 1; padding: 14px 8px; text-align: center;
-    font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
-    letter-spacing: .12em; color: var(--text-dim);
-    cursor: pointer; border: none; background: transparent;
-    border-bottom: 3px solid transparent; margin-bottom: -1px;
-    transition: all .2s;
-  }
-  .tab-btn:hover:not(.active) { color: var(--text-mid); background: rgba(212,168,83,.04); }
-  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-
-  /* ── BOOK GRID ─────────────────────────────────────────── */
-  .tab-panel { display: none; padding: 28px 20px 80px; animation: fadeIn .25s ease; }
-  .tab-panel.active { display: block; }
+  /* Shelf */
+  .tab-panel { display:none; padding:28px 16px 80px; animation:fadeIn .2s ease;
+    background: repeating-linear-gradient(180deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 17px,rgba(0,0,0,.05) 17px,rgba(0,0,0,.05) 18px,rgba(255,255,255,.03) 18px,rgba(255,255,255,.03) 19px,rgba(0,0,0,0) 19px,rgba(0,0,0,0) 36px),
+    linear-gradient(172deg,#5c2e10 0%,#7a4422 20%,#a46636 40%,#8b5530 58%,#7a4422 75%,#5c2e10 100%);
+    box-shadow:inset 0 8px 20px rgba(0,0,0,.30),inset 0 -4px 10px rgba(0,0,0,.20); min-height:280px; }
+  .tab-panel.active { display:block; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
-  .book-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-    gap: 20px; max-width: 960px; margin: 0 auto;
-  }
+  /* Grid */
+  .book-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:18px; }
+  .empty-state { text-align:center; padding:60px 20px; color:var(--gold); font-family:'Lora',serif; font-style:italic; font-size:1rem; text-shadow:0 1px 3px rgba(0,0,0,.4); }
+  .empty-state span { display:block; font-size:2.5rem; margin-bottom:12px; }
 
-  .book-card {
-    background: var(--charcoal-mid);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden; cursor: pointer;
-    transition: transform .22s ease, box-shadow .22s ease, border-color .22s;
-    display: flex; flex-direction: column;
-  }
-  .book-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0,0,0,.6), 0 0 0 1px var(--gold-line);
-    border-color: var(--gold-line);
-  }
+  /* Card */
+  .book-card { background:var(--cream); border-radius:var(--radius); box-shadow:0 6px 18px rgba(0,0,0,.40),0 2px 4px rgba(0,0,0,.22); overflow:hidden; cursor:pointer; transition:transform .22s ease,box-shadow .22s ease; display:flex; flex-direction:column; }
+  .book-card:hover { transform:translateY(-8px) scale(1.02); box-shadow:0 18px 36px rgba(0,0,0,.50),0 4px 8px rgba(0,0,0,.28); }
+  .cover-wrap { position:relative; }
+  .book-cover { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; }
+  .book-cover-placeholder { width:100%; aspect-ratio:2/3; background:linear-gradient(135deg,var(--brown) 0%,var(--brown-deep) 100%); display:flex; align-items:center; justify-content:center; font-size:2.4rem; color:var(--gold); opacity:.7; }
+  .book-badge { position:absolute; top:8px; right:8px; padding:2px 8px; border-radius:10px; font-size:.65rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+  .badge-free { background:var(--green); color:var(--brown-dark); }
+  .badge-paid { background:var(--gold-deep); color:var(--brown-dark); }
+  .book-info { padding:10px 10px 0; flex:1; }
+  .book-title { font-family:'Playfair Display',serif; font-size:.88rem; font-weight:600; color:var(--text-dark); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .book-author { font-family:'Lora',serif; font-style:italic; font-size:.72rem; color:var(--text-light); margin-top:3px; }
+  .book-action { padding:8px 10px 10px; }
+  .btn { width:100%; padding:7px; border:none; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:500; cursor:pointer; transition:all .18s; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .btn-read { background:var(--green); color:var(--brown-dark); }
+  .btn-read:hover { background:var(--green-dark); color:white; }
+  .btn-buy { background:var(--brown); color:var(--cream); }
+  .btn-buy:hover { background:var(--brown-deep); }
+  .btn-muted { background:var(--cream-dark); color:var(--text-mid); border:1.5px solid var(--cream-deeper); }
 
-  .cover-wrap { position: relative; aspect-ratio: 2/3; overflow: hidden; }
-  .book-cover { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
-  .book-card:hover .book-cover { transform: scale(1.04); }
-  .cover-placeholder {
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg, var(--charcoal-lift) 0%, var(--charcoal-deep) 100%);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 2.2rem; color: var(--gold-line);
-  }
+  /* Modal */
+  .modal-overlay { position:fixed; inset:0; z-index:200; background:rgba(42,26,14,.62); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; pointer-events:none; transition:opacity .22s; }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal { background:var(--cream); border-radius:var(--radius); box-shadow:var(--shadow-lg); padding:24px 22px; width:100%; max-width:420px; transform:translateY(16px) scale(.98); transition:transform .22s ease; max-height:94vh; overflow-y:auto; }
+  .modal-overlay.open .modal { transform:translateY(0) scale(1); }
+  .modal-title { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--text-dark); margin-bottom:2px; }
+  .modal-sub { font-size:.78rem; color:var(--text-light); }
+  .modal-actions { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:14px; }
+  .modal-actions .btn { width:auto; padding:8px 18px; font-size:.8rem; }
+  .btn-ghost { background:transparent; color:var(--text-light); border:1.5px solid var(--cream-deeper); }
+  .btn-ghost:hover { background:var(--cream-dark); }
+  .btn-green { background:var(--green); color:var(--brown-dark); font-weight:600; }
+  .btn-green:hover { background:var(--green-dark); color:white; }
+  .btn-gold { background:var(--gold-deep); color:var(--brown-dark); font-weight:600; }
+  .btn-gold:hover { filter:brightness(1.08); }
+  .field { width:100%; padding:9px 12px; border-radius:var(--radius-sm); border:1.5px solid var(--cream-deeper); background:white; font-family:'DM Sans',sans-serif; font-size:.85rem; color:var(--text-dark); outline:none; transition:border-color .18s; margin-bottom:8px; }
+  .field:focus { border-color:var(--green); }
+  .field::placeholder { color:var(--text-light); }
+  .divider { height:1px; background:var(--cream-deeper); margin:14px 0; }
 
-  /* Vinyl label overlay on cover */
-  .cover-label {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-bright), var(--gold), transparent);
-    opacity: .7;
-  }
+  /* Step bar */
+  .steps { display:flex; align-items:center; margin:14px 0 16px; }
+  .sdot { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; flex-shrink:0; transition:all .25s; background:var(--cream-deeper); color:var(--text-light); }
+  .sdot.on  { background:var(--brown); color:white; box-shadow:0 0 0 3px rgba(164,102,54,.2); }
+  .sdot.ok  { background:var(--green); color:var(--brown-dark); }
+  .sline { flex:1; height:2px; background:var(--cream-deeper); transition:background .25s; }
+  .sline.ok { background:var(--green); }
+  .scol { display:flex; flex-direction:column; align-items:center; }
+  .slabel { font-size:.62rem; color:var(--text-light); margin-top:3px; white-space:nowrap; }
 
-  .book-badge {
-    position: absolute; top: 8px; right: 8px;
-    font-size: .62rem; font-weight: 700; padding: 3px 8px;
-    border-radius: 4px; font-family: 'DM Mono', monospace;
-    letter-spacing: .06em; backdrop-filter: blur(4px);
-  }
-  .badge-free { background: rgba(46,204,113,.2); color: #2ecc71; border: 1px solid rgba(46,204,113,.3); }
-  .badge-paid { background: rgba(212,168,83,.2); color: var(--gold); border: 1px solid rgba(212,168,83,.3); }
+  /* QR box */
+  .qr-box { background:white; border-radius:var(--radius); border:2px solid var(--cream-deeper); padding:16px; text-align:center; margin-bottom:10px; }
+  .qr-eyebrow { font-size:.67rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-light); font-weight:600; margin-bottom:10px; }
+  #qrcode { display:inline-block; line-height:0; border-radius:6px; overflow:hidden; }
+  #qrcode canvas, #qrcode img { display:block; }
+  .amount-pill { display:inline-block; margin-top:10px; background:var(--gold); color:var(--brown-dark); font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; padding:4px 20px; border-radius:20px; border:1.5px solid var(--gold-deep); }
+  .upi-row { margin-top:7px; display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
+  .upi-chip { font-size:.7rem; font-family:monospace; background:var(--cream-dark); color:var(--text-mid); padding:3px 10px; border-radius:6px; }
+  .copy-btn { font-size:.67rem; padding:3px 9px; border-radius:6px; border:1px solid var(--cream-deeper); background:white; color:var(--text-mid); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s; }
+  .copy-btn:hover { background:var(--cream-dark); }
+  .app-chips { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+  .app-chip { font-size:.63rem; padding:2px 8px; border-radius:8px; background:var(--cream-dark); color:var(--text-mid); border:1px solid var(--cream-deeper); }
 
-  .book-info { padding: 12px 10px 8px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
-  .book-title {
-    font-family: 'Cormorant Garamond', serif; font-size: .9rem; font-weight: 600;
-    color: var(--text); line-height: 1.3;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .book-author {
-    font-family: 'DM Mono', monospace; font-size: .65rem;
-    color: var(--text-dim); letter-spacing: .04em;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
+  /* Info box styles */
+  .info-box { border-radius:var(--radius-sm); padding:13px; margin-bottom:10px; }
+  .info-box.green { background:rgba(107,191,142,.10); border:1.5px solid rgba(107,191,142,.35); }
+  .info-box.gold  { background:rgba(212,168,83,.10);  border:1.5px solid rgba(212,168,83,.38); }
+  .ibox-title { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; margin-bottom:7px; }
+  .ibox-title.green { color:var(--green-dark); }
+  .ibox-title.gold  { color:#a07820; }
+  .ibox-body  { font-size:.75rem; color:var(--text-mid); line-height:1.6; }
+  .ibox-body strong { color:var(--text-dark); }
+  .ibox-where { font-size:.69rem; color:var(--text-light); background:var(--cream-dark); border-radius:6px; padding:7px 10px; line-height:1.7; margin-top:8px; }
 
-  .book-action { padding: 0 10px 12px; }
-  .btn { width: 100%; padding: 7px; border-radius: 6px; border: none; cursor: pointer; font-size: .75rem; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: all .18s; letter-spacing: .04em; }
-  .btn-read { background: var(--gold); color: var(--charcoal-deep); }
-  .btn-read:hover { background: var(--gold-bright); }
-  .btn-sub { background: var(--charcoal-lift); color: var(--gold); border: 1px solid var(--gold-line); }
-  .btn-sub:hover { background: var(--gold-dim); }
-  .btn-muted { background: transparent; color: var(--text-dim); border: 1px solid var(--border); cursor: default; }
+  /* Author link */
+  .author-toggle { font-size:.7rem; color:var(--text-light); text-align:center; margin-top:10px; cursor:pointer; text-decoration:underline dotted var(--cream-deeper); transition:color .15s; user-select:none; }
+  .author-toggle:hover { color:var(--brown); }
 
-  .empty-state {
-    grid-column: 1/-1; text-align: center; padding: 60px 20px;
-    color: var(--text-dim); font-family: 'Cormorant Garamond', serif;
-    font-style: italic; font-size: 1rem;
-  }
-  .empty-state span { display: block; font-size: 2.4rem; margin-bottom: 10px; opacity: .4; }
+  /* Spinner */
+  .spinner-wrap { text-align:center; padding:28px 0; }
+  .spinner { width:34px; height:34px; border:3px solid var(--cream-deeper); border-top-color:var(--green); border-radius:50%; animation:spin .75s linear infinite; margin:0 auto 12px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .spinner-label { font-size:.82rem; color:var(--text-mid); }
 
-  /* ── MODALS ────────────────────────────────────────────── */
-  .modal-overlay {
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(10,10,11,.75); backdrop-filter: blur(6px);
-    display: flex; align-items: flex-end; justify-content: center;
-    padding: 0; opacity: 0; pointer-events: none; transition: opacity .22s;
-  }
-  @media (min-width: 600px) {
-    .modal-overlay { align-items: center; padding: 20px; }
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  /* Success */
+  .success-wrap { text-align:center; padding:18px 0 8px; }
+  .success-emoji { font-size:3rem; animation:pop .35s ease; margin-bottom:8px; }
+  @keyframes pop { 0%{transform:scale(0)} 80%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .success-title { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--text-dark); }
+  .success-sub   { font-size:.76rem; color:var(--text-light); margin-top:4px; }
 
-  .modal {
-    background: var(--charcoal-mid);
-    border: 1px solid var(--border-bright);
-    border-radius: var(--radius) var(--radius) 0 0;
-    padding: 28px 24px 32px; width: 100%; max-width: 440px;
-    box-shadow: 0 -8px 40px rgba(0,0,0,.6);
-    transform: translateY(20px); transition: transform .25s ease;
-    max-height: 90vh; overflow-y: auto;
-  }
-  @media (min-width: 600px) { .modal { border-radius: var(--radius); transform: translateY(0) scale(.96); } }
-  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+  /* Error */
+  .err { font-size:.75rem; color:#a93226; padding:7px 11px; background:#fdf0ee; border-radius:6px; border-left:3px solid #c0392b; margin-bottom:8px; display:none; }
 
-  /* Gold accent line at top of modal */
-  .modal::before {
-    content: ''; display: block; height: 2px; margin: -28px -24px 24px;
-    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-bright), var(--gold), transparent);
-  }
-
-  .modal-title {
-    font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem;
-    letter-spacing: .1em; color: var(--text); margin-bottom: 4px;
-  }
-  .modal-sub { font-size: .78rem; color: var(--text-mid); margin-bottom: 20px; font-family: 'Cormorant Garamond', serif; font-style: italic; }
-
-  /* Step dots */
-  .steps { display: flex; align-items: center; margin-bottom: 22px; gap: 0; }
-  .scol { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .sdot {
-    width: 26px; height: 26px; border-radius: 50%;
-    background: var(--charcoal-lift); border: 1.5px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: .72rem; font-weight: 600; color: var(--text-dim);
-    transition: all .2s;
-  }
-  .sdot.on  { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
-  .sdot.ok  { background: var(--green-dim); border-color: var(--green); color: var(--green); font-size: .8rem; }
-  .slabel { font-size: .6rem; color: var(--text-dim); letter-spacing: .08em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
-  .sline { flex: 1; height: 1px; background: var(--border); margin: 0 4px; transition: background .2s; }
-  .sline.ok { background: var(--green); }
-
-  .qr-box {
-    background: var(--charcoal-lift); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 18px; text-align: center; margin-bottom: 16px;
-  }
-  .qr-eyebrow { font-size: .72rem; color: var(--text-mid); margin-bottom: 12px; font-family: 'DM Mono', monospace; letter-spacing: .04em; }
-  #sub-qrcode { display: inline-block; border-radius: 6px; overflow: hidden; line-height: 0; margin-bottom: 12px; }
-  .amount-pill {
-    display: inline-block; background: var(--gold-dim); color: var(--gold);
-    border: 1px solid var(--gold-line); border-radius: 20px;
-    padding: 4px 16px; font-size: .82rem; font-weight: 600;
-    font-family: 'DM Mono', monospace; margin-bottom: 10px;
-  }
-  .upi-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
-  .upi-chip {
-    font-family: 'DM Mono', monospace; font-size: .75rem;
-    color: var(--text-mid); background: var(--charcoal-deep);
-    padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border);
-  }
-  .copy-btn {
-    background: var(--charcoal-deep); border: 1px solid var(--border);
-    color: var(--text-mid); padding: 4px 12px; border-radius: 20px;
-    font-size: .72rem; cursor: pointer; transition: all .18s; font-family: 'DM Sans', sans-serif;
-  }
-  .copy-btn:hover { border-color: var(--gold-line); color: var(--gold); }
-  .app-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
-  .app-chip {
-    font-size: .65rem; padding: 3px 10px; border-radius: 12px;
-    background: var(--charcoal-deep); border: 1px solid var(--border); color: var(--text-dim);
-    font-family: 'DM Mono', monospace;
-  }
-
-  .field {
-    width: 100%; padding: 11px 14px; border-radius: var(--radius-sm, 8px);
-    background: var(--charcoal-deep); border: 1.5px solid var(--border);
-    color: var(--text); font-family: 'DM Mono', monospace; font-size: .85rem;
-    outline: none; transition: border-color .2s; margin-bottom: 10px;
-  }
-  .field:focus { border-color: var(--gold-line); }
-  .field::placeholder { color: var(--text-dim); }
-
-  .err {
-    font-size: .75rem; color: var(--red); padding: 8px 12px;
-    background: rgba(192,57,43,.1); border-radius: 6px; margin-bottom: 10px;
-    display: none; border: 1px solid rgba(192,57,43,.2);
-  }
-
-  .info-box { border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; }
-  .info-box.green { background: var(--green-dim); border: 1px solid rgba(46,204,113,.2); }
-  .info-box.gold  { background: var(--gold-dim);  border: 1px solid var(--gold-line); }
-  .ibox-title { font-size: .75rem; font-weight: 600; margin-bottom: 6px; letter-spacing: .04em; }
-  .ibox-title.green { color: var(--green); }
-  .ibox-title.gold  { color: var(--gold); }
-  .ibox-body { font-size: .75rem; color: var(--text-mid); line-height: 1.6; }
-  .ibox-where { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.06); line-height: 1.8; }
-
-  .modal-actions { display: flex; gap: 10px; margin-top: 14px; }
-  .btn-modal { flex: 1; padding: 11px; border-radius: 8px; border: none; cursor: pointer; font-size: .82rem; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: all .18s; }
-  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
-  .btn-ghost:hover { border-color: var(--text-mid); color: var(--text); }
-  .btn-gold  { background: var(--gold); color: var(--charcoal-deep); }
-  .btn-gold:hover { background: var(--gold-bright); }
-  .btn-green-m { background: var(--green); color: var(--charcoal-deep); }
-  .btn-green-m:hover { filter: brightness(1.1); }
-
-  .spinner-wrap { text-align: center; padding: 32px 0; }
-  .spinner {
-    width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 14px;
-    border: 3px solid var(--border);
-    border-top-color: var(--gold);
-    animation: spin .8s linear infinite;
-  }
-  .spinner-label { font-size: .82rem; color: var(--text-mid); font-family: 'Cormorant Garamond', serif; font-style: italic; }
-
-  .success-wrap { text-align: center; padding: 28px 0; }
-  .success-emoji { font-size: 2.4rem; margin-bottom: 10px; }
-  .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .1em; color: var(--gold); margin-bottom: 6px; }
-  .success-sub { font-size: .8rem; color: var(--text-mid); font-family: 'Cormorant Garamond', serif; font-style: italic; }
-
-  .author-toggle {
-    font-size: .68rem; color: var(--text-dim); text-align: center;
-    margin-top: 12px; cursor: pointer; text-decoration: underline dotted;
-    transition: color .15s; font-family: 'DM Mono', monospace; letter-spacing: .04em;
-  }
-  .author-toggle:hover { color: var(--gold); }
-
-  /* ── TOAST ─────────────────────────────────────────────── */
-  #toast {
-    position: fixed; bottom: 28px; left: 50%;
-    transform: translateX(-50%) translateY(70px);
-    background: var(--charcoal-lift); color: var(--text);
-    border: 1px solid var(--border-bright);
-    padding: 10px 24px; border-radius: 30px; font-size: .78rem;
-    box-shadow: var(--shadow); transition: transform .3s ease; z-index: 999;
-    white-space: nowrap; font-family: 'DM Mono', monospace; letter-spacing: .04em;
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); }
+  /* Toast */
+  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--brown-dark); color:var(--cream); padding:10px 22px; border-radius:30px; font-size:.82rem; box-shadow:var(--shadow-md); transition:transform .3s ease; z-index:999; white-space:nowrap; pointer-events:none; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- TOP NAV -->
   <nav class="topnav">
-    <a class="topnav-brand" href="#" data-page="Main.html">
-      <div class="brand-record"></div>
-      <div>
-        <div class="brand-text"><span class="brand-live">LIVE</span><span class="brand-kitaab">KITAAB</span></div>
-        <span class="brand-music">Music</span>
-      </div>
+    <a class="topnav-brand" href="Main.html">
+      <span style="color:#fff;font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;">Live</span><span style="color:#f7e7b5;font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;">Kitaab</span>
     </a>
     <div class="topnav-links">
-      <a class="active" href="#" data-page="Main.html">Library</a>
-      <a href="#" data-page="Reader.html">Reader</a>
-      <a href="#" data-page="Account.html">Account</a>
+      <a href="Main.html">Library</a>
+      <a href="Reader.html">Reader</a>
+      <a href="Account.html" class="btn-account">Account</a>
+      <a href="MusicMain.html" style="color:var(--gold-deep);font-weight:600;">🎵 Music</a>
     </div>
   </nav>
 
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-vinyl"></div>
-    <div class="hero-text">
-      <div class="hero-eyebrow">▶ Now Playing — Musical Research Library</div>
-      <div class="hero-title">Books About <span>Sound</span></div>
-      <div class="hero-sub">Musicology · Theory · History · Composition</div>
+  <div class="banner">
+    <div class="banner-icon">📖</div>
+    <div class="banner-text">
+      <h1>Discover Your Next Story</h1>
+      <p>Books for every young reader</p>
     </div>
   </div>
 
-  <!-- FILTER BAR -->
   <div class="filter-bar">
     <span class="filter-label">Filter</span>
-    <button class="chip" id="freeChip" onclick="toggleFree()">💿 Free Only</button>
+    <button class="chip" id="freeChip" onclick="toggleFree()">💎 Free Only</button>
     <div class="filter-spacer"></div>
-    <button id="subBanner" onclick="isSubscribed()?null:openSubModal()" style="display:none;">⭐ Subscribe ₹200/mo</button>
-    <span class="status-text" id="statusText">Loading…</span>
+    <button id="subBanner" class="chip" onclick="isSubscribed()?null:openSubModal()"
+            style="display:none;border:none;cursor:pointer;font-weight:600;">⭐ Subscribe ₹200/mo</button>
+    <span id="statusText">Loading library…</span>
   </div>
 
-  <!-- TABS -->
   <div class="tab-strip">
-    <button class="tab-btn active" onclick="switchTab('long',this)">Long Books</button>
-    <button class="tab-btn" onclick="switchTab('short',this)">Short Books</button>
+    <button class="tab-btn active" onclick="switchTab('long',this)">📖 Long Books</button>
+    <button class="tab-btn" onclick="switchTab('short',this)">📝 Short Books</button>
+    <button class="tab-btn crosslink" id="musicTabBtn" onclick="nav('MusicMain.html')">🎵 Music</button>
   </div>
 
   <div id="panel-long"  class="tab-panel active"><div class="book-grid" id="grid-long"></div></div>
   <div id="panel-short" class="tab-panel"><div class="book-grid" id="grid-short"></div></div>
 
-  <!-- ── SUBSCRIPTION MODAL ──────────────────────────────── -->
-  <div class="modal-overlay" id="subModal">
-    <div class="modal">
-      <div class="modal-title">Subscribe</div>
-      <div class="modal-sub">₹200 per month · Full library access</div>
-      <div class="steps" id="sm-steps">
-        <div class="scol"><div class="sdot on" id="sd1">1</div><div class="slabel">Pay</div></div>
-        <div class="sline" id="sl1"></div>
-        <div class="scol"><div class="sdot" id="sd2">2</div><div class="slabel">Confirm</div></div>
-        <div class="sline" id="sl2"></div>
-        <div class="scol"><div class="sdot" id="sd3">3</div><div class="slabel">Read</div></div>
-      </div>
-      <div id="sp-pay">
-        <div class="qr-box">
-          <div class="qr-eyebrow">Open your UPI app · Scan · Pay ₹200</div>
-          <div id="sub-qrcode"></div>
-          <div class="amount-pill">₹200 / month</div>
-          <div class="upi-row">
-            <span class="upi-chip" id="sm-upi-text">arohanchatterjee881@okicici</span>
-            <button class="copy-btn" onclick="copySubUPI()">Copy</button>
-          </div>
-          <div class="app-chips">
-            <span class="app-chip">GPay</span><span class="app-chip">PhonePe</span>
-            <span class="app-chip">Paytm</span><span class="app-chip">Any UPI</span>
-          </div>
-        </div>
-        <p style="font-size:.72rem;color:var(--text-dim);text-align:center;margin-bottom:8px;font-family:'DM Mono',monospace;">After paying tap <strong style="color:var(--text-mid);">I've Paid →</strong> and enter your Transaction ID</p>
-        <div class="modal-actions">
-          <button class="btn-modal btn-ghost" onclick="closeModal('subModal')">Cancel</button>
-          <button class="btn-modal btn-gold" onclick="showSubPanel('utr')">I've Paid →</button>
-        </div>
-        <div class="author-toggle" onclick="openAuthorModal()">✍ I'm the author of this book</div>
-      </div>
-      <div id="sp-utr" style="display:none">
-        <div class="info-box green">
-          <div class="ibox-title green">✅ Enter Transaction ID (UTR)</div>
-          <div class="ibox-body">
-            Your UPI app gives you a Transaction / Reference ID after every payment. Enter it below.
-            <div class="ibox-where">
-              <strong>Where to find it:</strong><br>
-              GPay → tap payment → "Transaction ID"<br>
-              PhonePe → History → tap payment → "UTR No."<br>
-              Paytm → Passbook → "Bank Ref. No"
-            </div>
-          </div>
-        </div>
-        <input class="field" id="sm-utr" type="text" placeholder="e.g. 421831092847" maxlength="22" autocomplete="off"
-               oninput="this.value=this.value.replace(/[^0-9A-Za-z]/g,'').toUpperCase()"
-               onkeydown="if(event.key==='Enter')verifySubUTR()">
-        <div class="err" id="sub-utr-err"></div>
-        <div class="modal-actions">
-          <button class="btn-modal btn-ghost" onclick="showSubPanel('pay')">← Back</button>
-          <button class="btn-modal btn-gold" onclick="verifySubUTR()">Submit →</button>
-        </div>
-      </div>
-      <div id="sp-verifying" style="display:none">
-        <div class="spinner-wrap">
-          <div class="spinner"></div>
-          <div class="spinner-label">Submitting payment…</div>
-        </div>
-      </div>
-      <div id="sp-success" style="display:none">
-        <div class="success-wrap">
-          <div class="success-emoji">🎶</div>
-          <div class="success-title">Subscription Active!</div>
-          <div class="success-sub">Full library access for 30 days. The music awaits.</div>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
 
-  <!-- ── AUTHOR MODAL ─────────────────────────────────────── -->
-  <div class="modal-overlay" id="authorModal">
-    <div class="modal">
-      <div class="modal-title">Author Access</div>
-      <div class="modal-sub" id="author-modal-sub">Enter the passkey for this book.</div>
-      <div class="info-box gold">
-        <div class="ibox-title gold">✍ Author Passkey</div>
-        <div class="ibox-body">Enter the passkey you received from the LiveKitaab Music team when your book was published. This unlocks the book for you at no charge.</div>
+<!-- SUBSCRIPTION MODAL -->
+<div class="modal-overlay" id="subModal">
+  <div class="modal">
+    <div class="modal-title">📚 Subscribe to LiveKitaab</div>
+    <div class="modal-sub">₹200 / month · Unlock every book in the library</div>
+    <div class="steps" id="sm-steps">
+      <div class="scol"><div class="sdot on" id="sd1">1</div><div class="slabel">Pay</div></div>
+      <div class="sline" id="sl1"></div>
+      <div class="scol"><div class="sdot"    id="sd2">2</div><div class="slabel">Confirm</div></div>
+      <div class="sline" id="sl2"></div>
+      <div class="scol"><div class="sdot"    id="sd3">3</div><div class="slabel">Access</div></div>
+    </div>
+    <!-- PANEL 1: QR -->
+    <div id="sp-pay">
+      <div class="qr-box">
+        <div class="qr-eyebrow">📷 Open your UPI app → Scan QR → Pay ₹200</div>
+        <div id="sub-qrcode"></div>
+        <div class="amount-pill">₹200 / month</div>
+        <div class="upi-row">
+          <span class="upi-chip" id="sm-upi-text">arohanchatterjee881@okicici</span>
+          <button class="copy-btn" onclick="copySubUPI()">Copy</button>
+        </div>
+        <div class="app-chips">
+          <span class="app-chip">GPay</span><span class="app-chip">PhonePe</span>
+          <span class="app-chip">Paytm</span><span class="app-chip">Any UPI</span>
+        </div>
       </div>
-      <input class="field" id="author-pk-input" type="text"
-             placeholder="e.g. MUSIC-AUTHOR-2026" autocomplete="off"
-             onkeydown="if(event.key==='Enter')verifyAuthorPasskey()">
-      <div class="err" id="author-pk-err"></div>
+      <p style="font-size:.75rem;color:var(--text-mid);text-align:center;line-height:1.6;margin-bottom:4px;">
+        After paying, tap <strong>I've Paid →</strong> and enter your Transaction ID.
+      </p>
       <div class="modal-actions">
-        <button class="btn-modal btn-ghost" onclick="closeModal('authorModal')">Cancel</button>
-        <button class="btn-modal btn-gold" onclick="verifyAuthorPasskey()">🔓 Unlock</button>
+        <button class="btn btn-ghost" onclick="closeModal('subModal')">Cancel</button>
+        <button class="btn btn-green" onclick="showSubPanel('utr')">I've Paid →</button>
       </div>
+      <div class="author-toggle" onclick="openAuthorModal()">✍️ I'm the author of this book</div>
     </div>
-  </div>
-
-  <!-- ── STAFF PASSKEY MODAL ──────────────────────────────── -->
-  <div class="modal-overlay" id="passkeyModal">
-    <div class="modal">
-      <div class="modal-title">Staff Access</div>
-      <div class="modal-sub">Enter your staff passkey to unlock all books.</div>
-      <input class="field" id="pk-input" type="password"
-             placeholder="Passkey…" autocomplete="off"
-             onkeydown="if(event.key==='Enter')verifyPasskey()">
-      <div class="err" id="pk-err"></div>
+    <!-- PANEL 2: UTR -->
+    <div id="sp-utr" style="display:none">
+      <div class="info-box green">
+        <div class="ibox-title green">✅ Enter your Transaction ID (UTR)</div>
+        <div class="ibox-body">
+          Every UPI payment gives a <strong>Transaction / Reference ID</strong>.
+          Enter it below to confirm your ₹200 subscription payment.
+          <div class="ibox-where">
+            <strong>Where to find it:</strong><br>
+            • <strong>GPay</strong> → tap payment → "Transaction ID"<br>
+            • <strong>PhonePe</strong> → History → tap payment → "UTR No."<br>
+            • <strong>Paytm</strong> → Passbook → "Bank Ref. No"<br>
+            • <strong>BHIM / others</strong> → History → tap transaction
+          </div>
+        </div>
+      </div>
+      <input class="field" id="sm-utr" type="text"
+             placeholder="e.g. 421831092847" maxlength="22" autocomplete="off"
+             oninput="this.value=this.value.replace(/[^0-9A-Za-z]/g,'').toUpperCase()"
+             onkeydown="if(event.key==='Enter')verifySubUTR()">
+      <div class="err" id="sub-utr-err"></div>
       <div class="modal-actions">
-        <button class="btn-modal btn-ghost" onclick="closeModal('passkeyModal')">Cancel</button>
-        <button class="btn-modal btn-gold" onclick="verifyPasskey()">🔓 Unlock</button>
+        <button class="btn btn-ghost" onclick="showSubPanel('pay')">← Back</button>
+        <button class="btn btn-green" onclick="verifySubUTR()">Submit →</button>
+      </div>
+    </div>
+    <!-- PANEL 3: VERIFYING -->
+    <div id="sp-verifying" style="display:none">
+      <div class="spinner-wrap">
+        <div class="spinner"></div>
+        <div class="spinner-label">Submitting payment…</div>
+      </div>
+    </div>
+    <!-- PANEL 4: SUCCESS -->
+    <div id="sp-success" style="display:none">
+      <div class="success-wrap">
+        <div class="success-emoji">🎉</div>
+        <div class="success-title">Subscription Active!</div>
+        <div class="success-sub">You now have access to every book for 30 days.</div>
       </div>
     </div>
   </div>
+</div>
 
-</div><!-- #app -->
+<!-- HIDDEN PASSKEY MODAL -->
+<div class="modal-overlay" id="passkeyModal">
+  <div class="modal">
+    <div class="modal-title">🔑 Staff Access</div>
+    <div class="modal-sub">Enter your passkey to unlock all books.</div>
+    <input class="field" id="pk-input" type="password"
+           placeholder="Passkey…" autocomplete="off"
+           onkeydown="if(event.key==='Enter')verifyPasskey()">
+    <div class="err" id="pk-err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('passkeyModal')">Cancel</button>
+      <button class="btn btn-gold"  onclick="verifyPasskey()">🔓 Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTHOR PASSKEY MODAL -->
+<div class="modal-overlay" id="authorModal">
+  <div class="modal">
+    <div class="modal-title">✍️ Author Access</div>
+    <div class="modal-sub" id="author-modal-sub">Enter the passkey for this book.</div>
+    <div class="info-box gold" style="margin-bottom:14px;">
+      <div class="ibox-title gold">✍️ Author Passkey</div>
+      <div class="ibox-body">Enter the passkey you received from the LiveKitaab team when your book was published. This unlocks the book for you at no charge.</div>
+    </div>
+    <input class="field" id="author-pk-input" type="text"
+           placeholder="e.g. NONDI-PAYER-CHAP-2024"
+           autocomplete="off"
+           onkeydown="if(event.key==='Enter')verifyAuthorPasskey()">
+    <div class="err" id="author-pk-err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('authorModal')">Cancel</button>
+      <button class="btn btn-gold"  onclick="verifyAuthorPasskey()">🔓 Unlock as Author</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-//  CONFIG  — point this at your music library JSON
-// ══════════════════════════════════════════════════════════
-const LIBRARY_URL = 'https://raw.githubusercontent.com/livekitaab/music/main/library.json';
+// ═══════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════
+const LIBRARY_URL = 'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/library.json';
 const API_URL     = 'https://library-y7vs.onrender.com';
-const SUB_UPI_ID  = 'arohanchatterjee881@okicici';
-const SUB_PRICE   = 200;
 
-const HIDDEN_TRIGGER = 'livekitaabmusic';
-const STAFF_PASSKEYS = ['LKMUSIC-STAFF-2026', 'LK-ADMIN-2026'];
-
+// ═══════════════════════════════════════════════════════════
+//  FALLBACK (matches your real library.json structure)
+// ═══════════════════════════════════════════════════════════
 const FALLBACK_BOOKS = [
-  { id:'music_demo', title:'Introduction to Musicology', type:'long_book', price:0,
-    author:'Team LiveKitaab Music', cover:'', chapters:'', author_key:'MUSIC-DEMO-2026' }
+  { id:'somoyer', title:'Somoyer Chabikathi', type:'long_book', price:0, author:'Team Livekitaab',
+    cover:'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/Covers/Cover.png',
+    file:'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/Books/Test.clbk',
+    upi_id:'arohanchatterjee881@okicici', author_key:'LIVEKITAAB-SOMOYER-2024' },
+  { id:'ordhek_payer_chap', title:'Ordhek Payer Chap', type:'long_book', price:30, author:'Panpriyo Nondi',
+    cover:'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/Covers/Payer Chap Cover.png',
+    file:'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/Books/JS.lbk',
+    upi_id:'arohanchatterjee881@okicici', author_key:'NONDI-PAYER-CHAP-2024' },
+  { id:'Ek_Muhurter_Sporsho', title:'Ek Muhurter Sporsho', type:'short_book', price:1, author:'Shubhankar Babu',
+    cover:'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/Covers/Cover2.png',
+    file:'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/Books/EMS.lbk',
+    upi_id:'arohanchatterjee881@okicici', author_key:'BABU-EMS-2024' },
+  { id:'Jontrer_Songsar', title:'Poripati Jontrer Songsar', type:'short_book', price:1, author:'Shubhankar Babu',
+    cover:'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/Covers/Cover1.png',
+    file:'https://raw.githubusercontent.com/achatterjee4561-cyber/library/main/Books/JS.lbk',
+    upi_id:'arohanchatterjee881@okicici', author_key:'BABU-JS-2024' }
 ];
 
-// ── SUBSCRIPTION STATE ────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let allBooks   = [];
+let filterFree = false;
+
+// ── SUBSCRIPTION STATE ──────────────────────────────────────
+// Subscription stored as { code, expiry } in localStorage
+// isSubscribed() checks both existence and expiry date
 const SUB_KEY = 'lk_sub';
-function getSubscription() { try { return JSON.parse(localStorage.getItem(SUB_KEY)||'null'); } catch { return null; } }
-function isSubscribed() { const s=getSubscription(); return s?.expiry && new Date(s.expiry)>new Date(); }
-function activateSubscription(code,days) {
-  const e=new Date(); e.setDate(e.getDate()+(days||30));
-  localStorage.setItem(SUB_KEY,JSON.stringify({code,expiry:e.toISOString()}));
+
+function getSubscription() {
+  try { return JSON.parse(localStorage.getItem(SUB_KEY) || 'null'); } catch { return null; }
+}
+function isSubscribed() {
+  const sub = getSubscription();
+  if (!sub || !sub.expiry) return false;
+  return new Date(sub.expiry) > new Date();
+}
+function activateSubscription(code, days) {
+  const expiry = new Date();
+  expiry.setDate(expiry.getDate() + (days || 30));
+  localStorage.setItem(SUB_KEY, JSON.stringify({ code, expiry: expiry.toISOString() }));
 }
 function getSubDaysLeft() {
-  const s=getSubscription(); if(!s?.expiry) return 0;
-  return Math.max(0,Math.ceil((new Date(s.expiry)-new Date())/86400000));
+  const sub = getSubscription();
+  if (!sub || !sub.expiry) return 0;
+  const ms = new Date(sub.expiry) - new Date();
+  return Math.max(0, Math.ceil(ms / 86400000));
 }
 
-// ── STATE ─────────────────────────────────────────────────
-let allBooks       = [];
-let filterFree     = false;
-let _lastClickedBook = null;
-let _triggerBuffer   = '';
+// ── HIDDEN PASSKEY ──────────────────────────────────────────
+// Type this keyword anywhere on the page (not in an input) to open passkey modal
+const HIDDEN_TRIGGER  = 'livekitaab';
+const STAFF_PASSKEYS  = ['LIVEKITAAB-STAFF-2026', 'LK-ADMIN-2026']; // add your own
+let   _triggerBuffer  = '';
 
-// ── NAV ───────────────────────────────────────────────────
-const _base = (()=>{ const p=window.location.pathname; return p.substring(0,p.lastIndexOf('/')); })();
+// ═══════════════════════════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════════════════════════
+const _base = (() => { const p=window.location.pathname; return p.substring(0,p.lastIndexOf('/')); })();
 function nav(page) { window.location.href = _base+'/'+page; }
-function navHref(page) { return _base+'/'+page; }
-function enc(s) { return encodeURIComponent(s); }
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ── BOOT ──────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
-  document.querySelectorAll('a[data-page]').forEach(a => { a.href = navHref(a.dataset.page); });
   try {
     const r = await fetch(LIBRARY_URL);
     const j = await r.json();
@@ -703,22 +427,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   updateSubBanner();
 });
 
-// Hidden staff trigger
-document.addEventListener('keydown', e => {
-  if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
-  _triggerBuffer += e.key.toLowerCase();
-  if (_triggerBuffer.length > HIDDEN_TRIGGER.length)
-    _triggerBuffer = _triggerBuffer.slice(-HIDDEN_TRIGGER.length);
-  if (_triggerBuffer === HIDDEN_TRIGGER) {
-    _triggerBuffer = '';
-    document.getElementById('pk-input').value='';
-    document.getElementById('pk-err').style.display='none';
-    openModal('passkeyModal');
-    setTimeout(()=>document.getElementById('pk-input').focus(),60);
-  }
-});
-
-// ── RENDER ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════
 function renderLibrary() {
   const map = { long:'long_book', short:'short_book' };
   let shown = 0;
@@ -727,14 +438,14 @@ function renderLibrary() {
     const list = allBooks.filter(b => b.type===type && (!filterFree || b.price===0));
     grid.innerHTML = '';
     if (!list.length) {
-      grid.innerHTML = '<div class="empty-state"><span>🎵</span>No books here yet.</div>';
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span>🌿</span>No ${key.replace('_',' ')} found.</div>`;
     } else {
       list.forEach(b => grid.appendChild(makeCard(b)));
       shown += list.length;
     }
   }
   document.getElementById('statusText').textContent =
-    `${shown} book${shown!==1?'s':''} in the collection${filterFree?' (free only)':''}`;
+    `${shown} book${shown!==1?'s':''} available${filterFree?' (free only)':''}`;
 }
 
 function makeCard(book) {
@@ -745,61 +456,46 @@ function makeCard(book) {
   const card = document.createElement('div');
   card.className = 'book-card';
 
-  // Build cover wrap using DOM — avoids any nested quote issues
-  const coverWrap = document.createElement('div');
-  coverWrap.className = 'cover-wrap';
+  // Cover
+  const cw = document.createElement('div'); cw.className = 'cover-wrap';
   if (book.cover) {
     const img = document.createElement('img');
-    img.className = 'book-cover';
-    img.src = book.cover;
-    img.alt = book.title;
-    img.loading = 'lazy';
-    img.onerror = function() {
-      coverWrap.innerHTML = '<div class="cover-placeholder">🎵</div>';
-    };
-    coverWrap.appendChild(img);
-  } else {
-    const ph = document.createElement('div');
-    ph.className = 'cover-placeholder';
-    ph.textContent = '🎵';
-    coverWrap.appendChild(ph);
-  }
-  const coverLine = document.createElement('div');
-  coverLine.className = 'cover-label';
-  coverWrap.appendChild(coverLine);
+    img.className='book-cover'; img.src=book.cover; img.alt=book.title; img.loading='lazy';
+    img.onerror = () => { cw.innerHTML='<div class="book-cover-placeholder">📕</div>'; };
+    cw.appendChild(img);
+  } else { cw.innerHTML='<div class="book-cover-placeholder">📕</div>'; }
   const badge = document.createElement('span');
-  badge.className = 'book-badge ' + (isFree ? 'badge-free' : 'badge-paid');
-  badge.textContent = isFree ? 'Free' : '₹' + book.price;
-  coverWrap.appendChild(badge);
+  badge.className = 'book-badge '+(isFree?'badge-free':'badge-paid');
+  badge.textContent = isFree ? 'Free' : '₹'+book.price;
+  cw.appendChild(badge);
 
-  card.innerHTML = `
-    <div class="book-info">
-      <div class="book-title">${esc(book.title)}</div>
-      <div class="book-author">${esc(book.author||'')}</div>
-    </div>
-    <div class="book-action"></div>`;
-  card.prepend(coverWrap);
+  // Info
+  const info = document.createElement('div'); info.className='book-info';
+  info.innerHTML = `<div class="book-title">${esc(book.title)}</div><div class="book-author">${esc(book.author||'')}</div>`;
 
-  const ac  = card.querySelector('.book-action');
-  const btn = document.createElement('button');
-  btn.className = 'btn';
+  // Action button
+  const ac = document.createElement('div'); ac.className='book-action';
+  const btn = document.createElement('button'); btn.className='btn';
   if (canRead) {
-    btn.className += ' btn-read'; btn.textContent = '▶ Read';
-    btn.onclick = () => openReader(book);
+    btn.className+=' btn-read'; btn.innerHTML='📖 Read'; btn.onclick=()=>openReader(book);
   } else if (hasFile) {
-    btn.className += ' btn-sub'; btn.textContent = '⭐ Subscribe';
-    btn.onclick = () => { _lastClickedBook = book; openSubModal(); };
+    btn.className+=' btn-buy'; btn.innerHTML='⭐ Subscribe to Read';
+    btn.onclick=()=>{ _lastClickedBook = book; openSubModal(); };
   } else {
-    btn.className += ' btn-muted'; btn.textContent = 'Coming Soon'; btn.disabled = true;
+    btn.className+=' btn-muted'; btn.innerHTML='Coming Soon'; btn.disabled=true; btn.style.opacity='.5'; btn.style.cursor='default';
   }
   ac.appendChild(btn);
+
+  card.appendChild(cw); card.appendChild(info); card.appendChild(ac);
   return card;
 }
 
-// ── TABS / FILTER ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  TABS / FILTER
+// ═══════════════════════════════════════════════════════════
 function switchTab(key, el) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-'+key).classList.add('active');
 }
@@ -807,42 +503,24 @@ function toggleFree() {
   filterFree = !filterFree;
   const c = document.getElementById('freeChip');
   c.classList.toggle('active', filterFree);
-  c.textContent = filterFree ? '✨ Show All' : '💿 Free Only';
+  c.textContent = filterFree ? '✨ Show All' : '💎 Free Only';
   renderLibrary();
 }
 
-// ── SUBSCRIPTION BANNER ───────────────────────────────────
-function updateSubBanner() {
-  const b = document.getElementById('subBanner');
-  if (!b) return;
-  if (isSubscribed()) {
-    const d = getSubDaysLeft();
-    b.textContent = `⭐ Subscribed · ${d} day${d!==1?'s':''} left`;
-    b.style.display = 'inline-flex';
-    b.style.background = 'var(--green-dim)';
-    b.style.color = 'var(--green)';
-    b.style.borderColor = 'rgba(46,204,113,.3)';
-    b.onclick = null;
-  } else {
-    b.textContent = '⭐ Subscribe ₹200/mo';
-    b.style.display = 'inline-flex';
-    b.style.background = 'var(--gold-dim)';
-    b.style.color = 'var(--gold)';
-    b.style.borderColor = 'var(--gold-line)';
-    b.onclick = openSubModal;
-  }
-}
-
-// ── SUBSCRIPTION MODAL ────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  SUBSCRIPTION MODAL
+// ═══════════════════════════════════════════════════════════
+const SUB_UPI_ID = 'arohanchatterjee881@okicici';
+const SUB_PRICE  = 200;
 let _subPollInterval = null;
 let _subVerificationCode = null;
-let _usedSubUTRs = JSON.parse(localStorage.getItem('lk_sub_utrs')||'[]');
+let _usedSubUTRs = JSON.parse(localStorage.getItem('lk_sub_utrs') || '[]');
 
 function openSubModal() {
-  const upiUrl = `upi://pay?pa=${enc(SUB_UPI_ID)}&pn=${enc('LiveKitaab Music')}&am=${SUB_PRICE}&cu=INR&tn=${enc('LiveKitaab Music Subscription')}`;
+  const upiUrl = `upi://pay?pa=${enc(SUB_UPI_ID)}&pn=${enc('LiveKitaab')}&am=${SUB_PRICE}&cu=INR&tn=${enc('LiveKitaab Subscription')}`;
   const el = document.getElementById('sub-qrcode');
   el.innerHTML = '';
-  new QRCode(el, { text:upiUrl, width:160, height:160, colorDark:'#1a1a1c', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
+  new QRCode(el, { text:upiUrl, width:172, height:172, colorDark:'#3b2010', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
   document.getElementById('sm-upi-text').textContent = SUB_UPI_ID;
   showSubPanel('pay');
   openModal('subModal');
@@ -850,9 +528,12 @@ function openSubModal() {
 
 const SUB_PANELS = ['pay','utr','verifying','success'];
 function showSubPanel(name) {
-  SUB_PANELS.forEach(p => { const e=document.getElementById('sp-'+p); if(e) e.style.display='none'; });
+  SUB_PANELS.forEach(p => {
+    const el = document.getElementById('sp-'+p);
+    if (el) el.style.display = 'none';
+  });
   document.getElementById('sp-'+name).style.display = 'block';
-  document.getElementById('sm-steps').style.display = ['verifying','success'].includes(name)?'none':'flex';
+  document.getElementById('sm-steps').style.display = ['verifying','success'].includes(name) ? 'none' : 'flex';
   const states = { pay:[1,[],[]], utr:[2,[1],[]], verifying:[3,[1,2],[]], success:[null,[1,2,3],[]] };
   const s = states[name];
   if (s) {
@@ -863,38 +544,65 @@ function showSubPanel(name) {
       else if (s[0]===i)     { d.className='sdot on'; d.textContent=i; }
       else                   { d.className='sdot';    d.textContent=i; }
     });
-    const sl1=document.getElementById('sl1'), sl2=document.getElementById('sl2');
-    if(sl1) sl1.className='sline'+(s[1].includes(1)?' ok':'');
-    if(sl2) sl2.className='sline'+(s[1].includes(2)?' ok':'');
+    if (document.getElementById('sl1')) document.getElementById('sl1').className = 'sline'+(s[1].includes(1)?' ok':'');
+    if (document.getElementById('sl2')) document.getElementById('sl2').className = 'sline'+(s[1].includes(2)?' ok':'');
   }
-  if (name==='utr') { const el=document.getElementById('sm-utr'); if(el){el.value='';setTimeout(()=>el.focus(),60);} document.getElementById('sub-utr-err').style.display='none'; }
+  if (name==='utr') {
+    const el = document.getElementById('sm-utr');
+    if (el) { el.value=''; setTimeout(()=>el.focus(),60); }
+    const err = document.getElementById('sub-utr-err');
+    if (err) err.style.display='none';
+  }
 }
 
 async function verifySubUTR() {
   const utr   = document.getElementById('sm-utr').value.trim().toUpperCase();
   const errEl = document.getElementById('sub-utr-err');
   errEl.style.display = 'none';
-  if (utr.length < 10) { errEl.textContent='Please enter a valid Transaction ID (at least 10 characters).'; errEl.style.display='block'; return; }
-  if (_usedSubUTRs.includes(utr)) { errEl.textContent='This Transaction ID has already been submitted.'; errEl.style.display='block'; return; }
+
+  if (utr.length < 10) {
+    errEl.textContent = 'Please enter a valid Transaction ID (at least 10 characters).';
+    errEl.style.display = 'block'; return;
+  }
+  if (_usedSubUTRs.includes(utr)) {
+    errEl.textContent = 'This Transaction ID has already been submitted.';
+    errEl.style.display = 'block'; return;
+  }
+
   showSubPanel('verifying');
   document.querySelector('#sp-verifying .spinner-label').textContent = 'Submitting payment…';
+
   try {
     const res  = await fetch(`${API_URL}/api/request-subscription`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ transaction_id:utr, price:SUB_PRICE })
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ transaction_id: utr, price: SUB_PRICE })
     });
     const data = await res.json();
+
     if (data.error) {
-      showSubPanel('utr'); errEl.textContent=data.error==='Transaction ID already used'?'This Transaction ID has already been submitted.':(data.error||'Submission failed.'); errEl.style.display='block'; return;
+      showSubPanel('utr');
+      errEl.textContent = data.error === 'Transaction ID already used'
+        ? 'This Transaction ID has already been submitted.'
+        : (data.error || 'Submission failed. Please try again.');
+      errEl.style.display = 'block';
+      return;
     }
+
     _subVerificationCode = data.verification_code;
-    _usedSubUTRs.push(utr); localStorage.setItem('lk_sub_utrs',JSON.stringify(_usedSubUTRs));
+    _usedSubUTRs.push(utr);
+    localStorage.setItem('lk_sub_utrs', JSON.stringify(_usedSubUTRs));
+
     document.querySelector('#sp-verifying .spinner-label').innerHTML =
-      'Payment submitted ✓<br><small style="font-size:.7rem;color:var(--text-dim);">Waiting for approval — usually a few minutes.</small>';
+      'Payment submitted ✓<br><small style="color:var(--text-light);font-size:.72rem;">Waiting for approval — usually a few minutes.</small>';
+
     if (_subPollInterval) clearInterval(_subPollInterval);
     _subPollInterval = setInterval(pollSubApproval, 5000);
-  } catch {
-    showSubPanel('utr'); errEl.textContent='Could not reach server. Check your connection.'; errEl.style.display='block';
+
+  } catch(e) {
+    showSubPanel('utr');
+    errEl.textContent = 'Could not reach server. Check your connection and try again.';
+    errEl.style.display = 'block';
   }
 }
 
@@ -902,92 +610,205 @@ async function pollSubApproval() {
   if (!_subVerificationCode) return;
   try {
     const res  = await fetch(`${API_URL}/api/poll-subscription`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ verification_code:_subVerificationCode })
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ verification_code: _subVerificationCode })
     });
     const data = await res.json();
     if (data.approved) {
       clearInterval(_subPollInterval); _subPollInterval = null;
-      const code = _subVerificationCode; _subVerificationCode = null;
-      activateSubscription(code, data.days||30);
-      sessionStorage.setItem('lk_new_sub', JSON.stringify({ code, days:data.days||30, reason:'new_subscription' }));
+      const code = _subVerificationCode;
+      _subVerificationCode = null;
+
+      // Store subscription locally first so it survives the redirect
+      activateSubscription(code, data.days || 30);
+
+      // Signal Account.html to show the register tab with welcome message
+      sessionStorage.setItem('lk_new_sub', JSON.stringify({
+        code,
+        days: data.days || 30,
+        reason: 'new_subscription'
+      }));
+
+      // Show brief success then redirect to account creation
       showSubPanel('success');
-      document.querySelector('#sp-success .success-sub').textContent = 'Taking you to create your account…';
+      document.querySelector('#sp-success .success-sub').textContent =
+        'Taking you to create your account…';
       setTimeout(() => { closeModal('subModal'); nav('Account.html'); }, 2000);
     }
-  } catch {}
+  } catch { /* retry next tick */ }
 }
 
-// ── STAFF PASSKEY ─────────────────────────────────────────
+// ── SUBSCRIPTION BANNER ────────────────────────────────────
+function updateSubBanner() {
+  const banner = document.getElementById('subBanner');
+  if (!banner) return;
+  if (isSubscribed()) {
+    const days = getSubDaysLeft();
+    banner.textContent = `⭐ Subscribed · ${days} day${days!==1?'s':''} left`;
+    banner.style.display = 'inline-flex';
+    banner.style.background = 'var(--green)';
+    banner.style.color = 'var(--brown-dark)';
+  } else {
+    banner.textContent = '⭐ Subscribe ₹200/mo';
+    banner.style.display = 'inline-flex';
+    banner.style.background = 'var(--brown)';
+    banner.style.color = 'var(--cream)';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PASSKEY (hidden staff access)
+// ═══════════════════════════════════════════════════════════
 function verifyPasskey() {
   const input = document.getElementById('pk-input').value.trim();
   const errEl = document.getElementById('pk-err');
   errEl.style.display = 'none';
   if (!input) { errEl.textContent='Enter your passkey.'; errEl.style.display='block'; return; }
   if (STAFF_PASSKEYS.includes(input)) {
-    activateSubscription('PASSKEY-'+input, 365);
+    // Grant 30-day subscription via passkey
+    activateSubscription('PASSKEY-' + input, 30);
     closeModal('passkeyModal');
-    renderLibrary(); updateSubBanner();
-    showToast('🔓 Staff access granted');
+    renderLibrary();
+    updateSubBanner();
+    toast('🔓 Staff access granted for 30 days');
   } else {
-    errEl.textContent='Incorrect passkey.'; errEl.style.display='block';
+    errEl.textContent = 'Incorrect passkey.';
+    errEl.style.display = 'block';
     document.getElementById('pk-input').select();
   }
 }
 
-// ── AUTHOR PASSKEY ────────────────────────────────────────
+// Hidden trigger — type HIDDEN_TRIGGER anywhere outside an input
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  _triggerBuffer += e.key.toLowerCase();
+  if (_triggerBuffer.length > HIDDEN_TRIGGER.length) {
+    _triggerBuffer = _triggerBuffer.slice(-HIDDEN_TRIGGER.length);
+  }
+  if (_triggerBuffer === HIDDEN_TRIGGER) {
+    _triggerBuffer = '';
+    document.getElementById('pk-input').value = '';
+    document.getElementById('pk-err').style.display = 'none';
+    openModal('passkeyModal');
+    setTimeout(() => document.getElementById('pk-input').focus(), 60);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  AUTHOR PASSKEY
+//  Each book in library.json has an "author_key" field.
+//  Authors type it here → instant free access to that book
+//  without subscribing. Key is set per-book by the admin.
+// ═══════════════════════════════════════════════════════════
+let _authorBook = null; // book currently being unlocked via author key
+
 function openAuthorModal(book) {
-  _lastClickedBook = book || _lastClickedBook || null;
-  const sub = _lastClickedBook ? `Enter the passkey for "${_lastClickedBook.title}"` : 'Enter your author passkey.';
+  // Can be called from the subscribe modal (no specific book — use last clicked)
+  // or directly from a book card with a book object
+  _authorBook = book || _lastClickedBook || null;
+  const sub = _authorBook
+    ? `Enter the passkey for "${_authorBook.title}"`
+    : 'Enter your author passkey to unlock this book.';
   document.getElementById('author-modal-sub').textContent = sub;
   document.getElementById('author-pk-input').value = '';
   document.getElementById('author-pk-err').style.display = 'none';
-  closeModal('subModal'); openModal('authorModal');
+  // Close sub modal if open, then open author modal
+  closeModal('subModal');
+  openModal('authorModal');
   setTimeout(() => document.getElementById('author-pk-input').focus(), 80);
 }
+
 function verifyAuthorPasskey() {
   const input = document.getElementById('author-pk-input').value.trim();
   const errEl = document.getElementById('author-pk-err');
   errEl.style.display = 'none';
-  if (!input) { errEl.textContent='Please enter your author passkey.'; errEl.style.display='block'; return; }
-  if (_lastClickedBook) {
-    const correct = _lastClickedBook.author_key||'';
-    if (!correct) { errEl.textContent='No passkey set for this book yet.'; errEl.style.display='block'; return; }
-    if (input===correct) { closeModal('authorModal'); grantAuthorAccess(_lastClickedBook); return; }
-    errEl.textContent='Incorrect passkey. Check for typos.'; errEl.style.display='block';
-    document.getElementById('author-pk-input').select(); return;
+
+  if (!input) {
+    errEl.textContent = 'Please enter your author passkey.';
+    errEl.style.display = 'block'; return;
   }
-  const match = allBooks.find(b => b.author_key && b.author_key===input);
-  if (match) { closeModal('authorModal'); grantAuthorAccess(match); }
-  else { errEl.textContent='Passkey not recognised.'; errEl.style.display='block'; document.getElementById('author-pk-input').select(); }
+
+  // If we have a specific book, check its key
+  if (_authorBook) {
+    const correct = _authorBook.author_key || '';
+    if (!correct) {
+      errEl.textContent = 'No author passkey has been set for this book yet. Contact the LiveKitaab team.';
+      errEl.style.display = 'block'; return;
+    }
+    if (input === correct) {
+      closeModal('authorModal');
+      grantAuthorAccess(_authorBook);
+    } else {
+      errEl.textContent = 'Incorrect passkey. Check for typos or contact the LiveKitaab team.';
+      errEl.style.display = 'block';
+      document.getElementById('author-pk-input').select();
+    }
+    return;
+  }
+
+  // No specific book — check against all books in library (for when no book is selected)
+  const match = allBooks.find(b => b.author_key && b.author_key === input);
+  if (match) {
+    closeModal('authorModal');
+    grantAuthorAccess(match);
+  } else {
+    errEl.textContent = 'Passkey not recognised. Check for typos or contact the LiveKitaab team.';
+    errEl.style.display = 'block';
+    document.getElementById('author-pk-input').select();
+  }
 }
+
 function grantAuthorAccess(book) {
-  activateSubscription('AUTHOR-'+(book.author_key||book.id), 365);
-  renderLibrary(); updateSubBanner();
-  showToast('✍ Author access granted');
+  // Grant a long-term author subscription (365 days) stored locally
+  activateSubscription('AUTHOR-' + (book.author_key || book.id), 365);
+  renderLibrary();
+  updateSubBanner();
+  showToast('✍️ Author access granted — opening "' + book.title + '"…');
   setTimeout(() => openReader(book), 900);
 }
 
-// ── READER ────────────────────────────────────────────────
+// Track last clicked book so the author modal knows which book to unlock
+let _lastClickedBook = null;
+
+// ═══════════════════════════════════════════════════════════
+//  READER
+// ═══════════════════════════════════════════════════════════
 function openReader(book) {
   const payload = { ...book };
-  if (book.chapters) { payload.chapters=book.chapters; delete payload.file; }
-  else { payload.file=book.file||''; delete payload.chapters; }
+  if (book.chapters) {
+    payload.chapters = book.chapters;
+    delete payload.file;
+  } else {
+    payload.file = book.file || '';
+    delete payload.chapters;
+  }
   sessionStorage.setItem('pending_book', JSON.stringify(payload));
   nav('Reader.html');
 }
 
-// ── HELPERS ───────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  COPY SUB UPI ID
+// ═══════════════════════════════════════════════════════════
 function copySubUPI() {
-  navigator.clipboard.writeText(SUB_UPI_ID).then(()=>showToast('UPI ID copied!')).catch(()=>{});
+  navigator.clipboard.writeText(SUB_UPI_ID).then(()=>toast('UPI ID copied!')).catch(()=>{});
 }
+
+// ═══════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
 let _tt;
-function showToast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),2800);
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(()=>t.classList.remove('show'), 2600);
 }
+
+function enc(s) { return encodeURIComponent(s); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 </body>
 </html>
