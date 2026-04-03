@@ -1,1 +1,18 @@
+{
+  "books": [
+    {
+      "id": "Bhobapagla_Songit _1",
+      "title": "Bhobapagla Songit 1",
+      "type": "long_book",
+      "cover": "https://raw.githubusercontent.com/livekitaab/music/main/Covers/CoverBhobaPagla1.png",
+      "chapters": "https://raw.githubusercontent.com/livekitaab/music/main/Books/Chapters.Json",
+      "price": 50,
+      "description": "A thrilling journey through time",
+      "author": "Bhoba Pagla",
+      "pages": 350,
+      "upi_id": "arohanchatterjee881@okicici",
+      "author_key": "LIVEKITAAB-SAHAJPATH-2026"
+    },
+  ]
+}
 
