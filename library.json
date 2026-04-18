@@ -25,6 +25,19 @@
       "pages": 350,
       "upi_id": "arohanchatterjee881@okicici",
       "author_key": "LIVEKITAAB-BHABAPAGLA2-2026"
+    },
+    {
+      "id": "Bhobapagla_Songit_3",
+      "title": "Bhobapagla Songit 3",
+      "type": "long_book",
+      "cover": "https://cdn.jsdelivr.net/gh/livekitaab/music/Covers/CoverBhabaPaglaSadhanSangit3.png",
+      "chapters": "https://cdn.jsdelivr.net/gh/livekitaab/music/Books/BhabaPagla3/Chapters.json",
+      "price": 50,
+      "description": "A thrilling journey through time",
+      "author": "Bhoba Pagla",
+      "pages": 350,
+      "upi_id": "arohanchatterjee881@okicici",
+      "author_key": "LIVEKITAAB-BHABAPAGLA3-2026"
     }
   ]
 }
